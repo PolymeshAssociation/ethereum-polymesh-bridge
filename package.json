@@ -1,0 +1,25 @@
+{
+  "name": "bridge-contract",
+  "version": "1.0.0",
+  "description": "Contract used to lock POLY",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "^2.4.0",
+    "truffle": "^5.1.0"
+  },
+  "devDependencies": {
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Bridge",
+    "POLY",
+    "POLYMESH"
+  ],
+  "author": "Polymath Inc.",
+  "license": "MIT"
+}
