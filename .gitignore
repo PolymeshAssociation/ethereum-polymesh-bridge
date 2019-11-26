@@ -6,4 +6,6 @@ yarn-error.log
 /build
 .env
 allfiredEvents
+scTopics
 /coverage
+coverage.json

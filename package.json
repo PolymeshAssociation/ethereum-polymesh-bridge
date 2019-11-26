@@ -9,10 +9,11 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "ganache-cli": "^6.7.0",
-    "openzeppelin-solidity": "^2.4.0",
+    "openzeppelin-solidity": "2.2.0",
     "solidity-coverage": "^0.6.7",
     "truffle": "^5.1.0",
-    "truffle-hdwallet-provider": "^1.0.17"
+    "truffle-hdwallet-provider": "^1.0.17",
+    "web3": "^1.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",

@@ -1,5 +1,4 @@
 const Web3 = require("web3");
-//const sigUtil = require('eth-sig-util')
 let BN = Web3.utils.BN;
 
 function getSignData(tmAddress, meshAddress, value, nonce, pk) {
