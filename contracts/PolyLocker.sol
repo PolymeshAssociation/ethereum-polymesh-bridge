@@ -54,7 +54,6 @@ contract PolyLocker is PolyLockerStorage {
         require(IERC20(polyToken).balanceOf(msg.sender) > uint256(0), "Insufficient funds");
         _lock(_meshAddress, msg.sender, _lockedValue);
     }
-    event LogA(address _A);
 
     /**
      * @notice Used for locking the POLY using the off chain data blob
@@ -75,7 +74,7 @@ contract PolyLocker is PolyLockerStorage {
         require(lockedValue == _value, "Invalid amount of tokens");
         require(keccak256(abi.encodePacked(meshAddress)) == keccak256(abi.encodePacked(_meshAddress)), "Invalid mesh address");
         require(authenticationNonce[_holder][nonce] == false, "Already used signature");
-        bytes32 hash = keccak256(abi.encodePacked(targetAddress, nonce, lockedValue, meshAddress));
+        bytes32 hash = keccak256(abi.encodePacked(this, meshAddress, lockedValue, nonce));
         require(hash.toEthSignedMessageHash().recover(signature) == _holder, "Incorrect Signer"); 
         // Invalidate the nonce
         authenticationNonce[_holder][nonce] = true;
