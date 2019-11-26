@@ -4,14 +4,13 @@ const PolyToken = artifacts.require("PolyTokenFaucet.sol");
 
 module.exports = function(deployer, network, accounts) {
   
-  if (network === "development") {
-    deployer.deploy(PolyToken).then((polyToken) => {
-      deployer.deploy(PolyLocker).then((polylocker) => {
-        deployer.deploy(PolyLockerProxy, "1.0.0", polylocker.address, polyToken.address).then(() => {
+  if (network === "development" || network === "coverage") {
+    let Owner = accounts[0];
+    deployer.deploy(PolyToken, {from: Owner}).then((polyToken) => {
+      deployer.deploy(PolyLocker, {from: Owner}).then((polylocker) => {
+        deployer.deploy(PolyLockerProxy, "1.0.0", polylocker.address, polyToken.address, {from: Owner}).then(() => {
         });
       });
     });
-  }
-
-  
+  } 
 };

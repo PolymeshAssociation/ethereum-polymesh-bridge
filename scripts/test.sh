@@ -50,4 +50,12 @@ else
     echo "Starting our own testrpc instance"
     start_testrpc
 fi
-node --max-old-space-size=8192 node_modules/.bin/truffle test `find test/*.js`
+
+if [ "$COVERAGE" = true ]; then
+    node --max_old_space_size=8192 node_modules/.bin/solidity-coverage
+    if [ "$CIRCLECI" = true ]; then
+        cat coverage/lcov.info | node_modules/.bin/coveralls || echo 'Failed to report coverage to Coveralls'
+    fi
+else
+    node --max-old-space-size=8192 node_modules/.bin/truffle test `find test/*.js`
+fi

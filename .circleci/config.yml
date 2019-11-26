@@ -1,0 +1,61 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: maxsam4/solidity-kit
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run: yarn install
+      - run: node --version
+      - run: truffle version
+      - run: truffle compile
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+  test:
+    docker:
+      - image: maxsam4/solidity-kit
+    parallelism: 2
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run: yarn install
+      - run: node --version
+      - run: truffle version
+      - run: npm run test
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: ./test-results/mocha/results.xml
+  coverage:
+    docker:
+      - image: maxsam4/solidity-kit
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run: yarn install
+      - run: node --version
+      - run: truffle version
+      - run:
+          command: npm run coverage
+          no_output_timeout: 1h
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - store_artifacts:
+          path: ./coverage/lcov.info
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - coverage
