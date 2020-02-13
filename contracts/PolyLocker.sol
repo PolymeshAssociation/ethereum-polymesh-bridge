@@ -32,7 +32,7 @@ contract PolyLocker is PolyLockerStorage {
     using ECDSA for bytes32;
 
     // Emit an event when the poly gets lock
-    event PolyLocked(address indexed _holder, string _meshAddress, uint256 _value);
+    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _value);
 
     constructor () public  {
     }
@@ -95,7 +95,8 @@ contract PolyLocker is PolyLockerStorage {
         require(_senderBalance > uint256(0), "Invalid locked amount");
         // Transfer funds to the contract
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
-        emit PolyLocked(_holder, _meshAddress, _senderBalance);
+        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, _senderBalance);
+        noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
     }
     
 }

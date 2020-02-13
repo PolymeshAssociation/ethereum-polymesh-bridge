@@ -144,8 +144,10 @@ contract("PolyLocker", async(accounts) => {
             let tx = await I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT1});
             contract_balance = parseFloat(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(I_POLYLOCKER.address)).toString()));
             
+            assert.equal(await I_POLYLOCKER.noOfeventsEmitted.call(), 1);
             assert.equal((await POLYTOKEN.balanceOf.call(ACCOUNT1)).toString(), 0);
             assert.equal(contract_balance, 4000);
+            assert.equal(tx.logs[0].args._id, 0);
             assert.equal(tx.logs[0].args._holder, ACCOUNT1);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
             assert.equal(web3.utils.fromWei((tx.logs[0].args._value).toString()), 4000);
