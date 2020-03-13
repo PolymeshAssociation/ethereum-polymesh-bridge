@@ -2,6 +2,7 @@
 .npm-debug.log
 *.DS_Store
 .vscode/
+.idea
 yarn-error.log
 /build
 .env
@@ -9,3 +10,4 @@ allfiredEvents
 scTopics
 /coverage
 coverage.json
+contracts.json
