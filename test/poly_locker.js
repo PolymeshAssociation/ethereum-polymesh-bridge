@@ -135,7 +135,7 @@ contract("PolyLocker", async(accounts) => {
             const meshAddress = "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y";
             await catchRevert(
                 I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT5}),
-                "Invalid locked amount"
+                "Minimum amount to transfer to Polymesh is 1 POLY -- Reason given: Minimum amount to transfer to Polymesh is 1 POLY."
             );
         });
 
@@ -150,7 +150,7 @@ contract("PolyLocker", async(accounts) => {
             assert.equal(tx.logs[0].args._id, 0);
             assert.equal(tx.logs[0].args._holder, ACCOUNT1);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
-            assert.equal(web3.utils.fromWei((tx.logs[0].args._value).toString()), 4000);
+            assert.equal(tx.logs[0].args._value.toNumber(), 4000 * 10e6);
         });
     });
 
@@ -175,7 +175,7 @@ contract("PolyLocker", async(accounts) => {
             assert.equal(contract_balance, 4500.24);
             assert.equal(tx.logs[0].args._holder, ACCOUNT4);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
-            assert.equal(web3.utils.fromWei((tx.logs[0].args._value).toString()), 500.24);
+            assert.equal(tx.logs[0].args._value.toNumber(), 500.24 * 10e6);
         });
 
         it("Should successfully lock poly which doesn't has right precision leave dust behind", async() => {
@@ -184,19 +184,19 @@ contract("PolyLocker", async(accounts) => {
             await POLYTOKEN.approve(I_POLYLOCKER.address, account2_balance, { from: ACCOUNT2 });
             let tx = await I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT2});
             contract_balance = parseFloat(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(I_POLYLOCKER.address)).toString()));
-            console.log(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(ACCOUNT2)).toString()));
-            assert.equal(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(ACCOUNT2)).toString()), 0.000000000000341);
+            console.log((await POLYTOKEN.balanceOf.call(ACCOUNT2)).toString());
+            assert.equal(await POLYTOKEN.balanceOf.call(ACCOUNT2), new BN(247811341000));
             assert.equal(contract_balance, 4550.912910247811);
             assert.equal(tx.logs[0].args._holder, ACCOUNT2);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
-            assert.equal(web3.utils.fromWei((tx.logs[0].args._value).toString()), 50.672910247811);
+            assert.equal((tx.logs[0].args._value), new BN(50.672910247811));
         });
 
         it("Should fail to lock dust because of invalid granularity of the tokens", async() => {
             const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
             await catchRevert(
                 I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT2}),
-                "Invalid locked amount"
+                "Minimum amount to transfer to Polymesh is 1 POLY"
             );
         });
 
@@ -208,10 +208,10 @@ contract("PolyLocker", async(accounts) => {
             contract_balance = parseFloat(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(I_POLYLOCKER.address)).toString()));
 
             assert.equal(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(ACCOUNT3)).toString()), 0);
-            assert.equal(contract_balance, 4651.369699247811);
+            assert.equal(contract_balance, 4651.369699);
             assert.equal(tx.logs[0].args._holder, ACCOUNT3);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
-            assert.equal(web3.utils.fromWei((tx.logs[0].args._value).toString()), 100.456789);
+            assert.equal(tx.logs[0].args._value, new BN(100.456789));
         });
     });
 
@@ -266,7 +266,7 @@ contract("PolyLocker", async(accounts) => {
             contract_balance = parseFloat(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(I_POLYLOCKER.address)).toString()));
 
             assert.equal(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(SIGNER)).toString()), 4000);
-            assert.equal(contract_balance, 5651.369699247811);
+            assert.equal(contract_balance, 5651.369699);
             assert.equal(tx.logs[0].args._holder, SIGNER);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
             assert.equal(web3.utils.fromWei((tx.logs[0].args._value).toString()), 1000);

@@ -85,13 +85,19 @@ contract PolyLocker is PolyLockerStorage {
     function _lock(string memory _meshAddress, address _holder, uint256 _senderBalance) internal {
         // Validate the MESH address
         require(bytes(_meshAddress).length == VALID_ADDRESS_LENGTH, "Invalid length of mesh address");
+        // Check the valid granularity, It should be 10^9 if not then transfer only 10^9 granularity funds
+        // rest will reamin as dust in the sender account
+        if (_senderBalance % TRUNCATE_SCALE != 0) {
+            _senderBalance = _senderBalance.div(TRUNCATE_SCALE);
+            _senderBalance = _senderBalance.mul(TRUNCATE_SCALE);
+        }
 
         // Make sure balance is divisible by 10e18
         require(_senderBalance.div(10 ** 18) > uint256(1), "Minimum amount to transfer to Polymesh is 1 POLY");
 
         // Polymesh balances have 6 decimal places.
         // 1 POLY on Ethereum has 18 decimal places. 1 POLY on Polymesh has 6 decimal places.
-        uint256 polymeshBalance = _senderBalance.div(10 ** 12);
+        uint256 polymeshBalance = _senderBalance.div(TRUNCATE_SCALE);
 
         // Transfer funds to the contract
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
