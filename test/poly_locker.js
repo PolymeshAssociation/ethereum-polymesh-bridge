@@ -37,7 +37,7 @@ contract("PolyLocker", async(accounts) => {
         ACCOUNT3 = accounts[3];
         ACCOUNT4 = accounts[4];
         ACCOUNT5 = accounts[5];
-        
+
 
         POLYTOKEN = await PolyToken.new();
         POLYLOCKER = await PolyLocker.new();
@@ -84,7 +84,7 @@ contract("PolyLocker", async(accounts) => {
 
             await POLYTOKEN.getTokens(web3.utils.toWei("4000"), ACCOUNT1);
             await POLYTOKEN.getTokens(web3.utils.toWei("50.672910247811341"), ACCOUNT2);
-            await POLYTOKEN.getTokens(web3.utils.toWei("100.456789"), ACCOUNT3); 
+            await POLYTOKEN.getTokens(web3.utils.toWei("100.456789"), ACCOUNT3);
             await POLYTOKEN.getTokens(web3.utils.toWei("50000"), ACCOUNT4);
             await POLYTOKEN.getTokens(web3.utils.toWei("5000"), SIGNER);
 
@@ -112,7 +112,7 @@ contract("PolyLocker", async(accounts) => {
 
         it("Should fail to lock Poly -- Insufficient allowance", async() => {
             const meshAddress = "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y";
-            
+
             await POLYTOKEN.approve(I_POLYLOCKER.address, web3.utils.toWei("500"), { from: ACCOUNT1 });
             await catchRevert(
                 I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT1}),
@@ -143,11 +143,11 @@ contract("PolyLocker", async(accounts) => {
             const meshAddress = "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y";
             let tx = await I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT1});
             contract_balance = parseFloat(web3.utils.fromWei((await POLYTOKEN.balanceOf.call(I_POLYLOCKER.address)).toString()));
-            
+
             assert.equal(await I_POLYLOCKER.noOfeventsEmitted.call(), 1);
             assert.equal((await POLYTOKEN.balanceOf.call(ACCOUNT1)).toString(), 0);
             assert.equal(contract_balance, 4000);
-            assert.equal(tx.logs[0].args._id, 0);
+            assert.equal(tx.logs[0].args._id, 1);
             assert.equal(tx.logs[0].args._holder, ACCOUNT1);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
             assert.equal(web3.utils.fromWei((tx.logs[0].args._value).toString()), 4000);
@@ -258,7 +258,7 @@ contract("PolyLocker", async(accounts) => {
                 "Invalid mesh address"
             );
         });
-        
+
         it("Should successfully lock Poly tokens using lockWithData", async() => {
             const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
             let data = getSignData(I_POLYLOCKER.address, meshAddress, new BN(web3.utils.toWei("1000")), new BN(1), SIGNERPRIVATEKEY);
@@ -328,6 +328,86 @@ contract("PolyLocker", async(accounts) => {
                 await POLYLOCKERPROXY.version.call({from: OWNER}),
                 "1.1.0"
             );
+        });
+    });
+
+    describe("Test case for freezing and unfreezing locking", async () => {
+        it("Should not allow unauthorized address to freeze locking", async () => {
+            await catchRevert(
+                I_POLYLOCKER.freezeLocking({
+                    from: ACCOUNT5
+                }),
+                "Unauthorized"
+            );
+        });
+
+        it("Should not allow unfreezing when already unfrozen", async () => {
+            await catchRevert(
+                I_POLYLOCKER.unfreezeLocking({
+                    from: OWNER
+                }),
+                "Already unfrozen"
+            );
+        });
+
+        it("Should successfully freeze locking of tokens", async () => {
+            await I_POLYLOCKER.freezeLocking({
+                from: OWNER
+            });
+            assert.equal(await I_POLYLOCKER.frozen(), true);
+            await POLYTOKEN.approve(
+                I_POLYLOCKER.address,
+                web3.utils.toWei("500"), {
+                    from: ACCOUNT4
+                }
+            );
+            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
+            await catchRevert(
+                I_POLYLOCKER.limitLock(meshAddress, web3.utils.toWei("500"), {
+                    from: ACCOUNT4,
+                }),
+                "Locking frozen"
+            );
+        });
+
+        it("Should not allow unauthorized address to unfreeze locking", async () => {
+            await catchRevert(
+                I_POLYLOCKER.unfreezeLocking({
+                    from: ACCOUNT5
+                }),
+                "Unauthorized"
+            );
+        });
+
+        it("Should not allow freezing when already frozen", async () => {
+            await catchRevert(
+                I_POLYLOCKER.freezeLocking({
+                    from: OWNER
+                }),
+                "Already frozen"
+            );
+        });
+
+        it("Should successfully unfreeze locking of tokens", async () => {
+            await I_POLYLOCKER.unfreezeLocking({
+                from: OWNER
+            });
+            assert.equal(await I_POLYLOCKER.frozen(), false);
+
+            await POLYTOKEN.approve(I_POLYLOCKER.address, web3.utils.toWei("500"), {
+                from: ACCOUNT4,
+            });
+            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
+            let tx = await I_POLYLOCKER.limitLock(
+                meshAddress,
+                web3.utils.toWei("500"), {
+                    from: ACCOUNT4
+                }
+            );
+
+            assert.equal(tx.logs[0].args._holder, ACCOUNT4);
+            assert.equal(tx.logs[0].args._meshAddress, meshAddress);
+            assert.equal(web3.utils.fromWei(tx.logs[0].args._value.toString()), 500);
         });
     });
 })
