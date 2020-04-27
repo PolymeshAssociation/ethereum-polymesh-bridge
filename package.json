@@ -28,10 +28,10 @@
   },
   "scripts": {
     "test": "scripts/test.sh 2> /dev/null",
-    "postinstall" : "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 --gasLimit 9000000 &",
+    "postinstall" : "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 -p 9000 --gasLimit 9000000 &",
     "compile": "truffle compile --optimize-runs 200",
     "coverage": "scripts/coverage.sh",
-    "ganache-cli": "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 --gasLimit 9000000",
+    "ganache-cli": "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 -p 9000 --gasLimit 9000000",
     "migrate:local": "truffle migrate --network=development",
     "migrate:goerli": "truffle migrate --network=goerli",
     "migrate:kovan": "truffle migrate --network=kovan",
