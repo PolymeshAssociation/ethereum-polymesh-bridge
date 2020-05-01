@@ -11,9 +11,9 @@
     "ganache-cli": "^6.8.0-istanbul.0",
     "openzeppelin-solidity": "2.2.0",
     "solidity-coverage": "^0.6.7",
-    "truffle": "^5.1.0",
+    "truffle": "5.1.23",
     "truffle-hdwallet-provider": "^1.0.17",
-    "web3": "^1.2.4"
+    "web3": "1.2.7"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
@@ -28,9 +28,10 @@
   },
   "scripts": {
     "test": "scripts/test.sh 2> /dev/null",
+    "postinstall" : "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 -p 9000 --gasLimit 9000000 &",
     "compile": "truffle compile --optimize-runs 200",
     "coverage": "scripts/coverage.sh",
-    "ganache-cli": "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 --gasLimit 9000000",
+    "ganache-cli": "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 -p 9000 --gasLimit 9000000",
     "migrate:local": "truffle migrate --network=development",
     "migrate:goerli": "truffle migrate --network=goerli",
     "migrate:kovan": "truffle migrate --network=kovan",
