@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-// Requirements 
+// Requirements
 
 // Any POLY holder can lock POLY (Issuers, Investors, WL, Polymath Founders, etc.)
 // Attempt to lock coins other than POLY must fail
@@ -32,7 +32,7 @@ contract PolyLocker is PolyLockerStorage {
     using ECDSA for bytes32;
 
     // Emit an event when the poly gets lock
-    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _value);
+    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance, uint256 _polyTokenBalance);
 
     constructor () public  {
     }
@@ -75,7 +75,7 @@ contract PolyLocker is PolyLockerStorage {
         require(keccak256(abi.encodePacked(meshAddress)) == keccak256(abi.encodePacked(_meshAddress)), "Invalid mesh address");
         require(authenticationNonce[_holder][nonce] == false, "Already used signature");
         bytes32 hash = keccak256(abi.encodePacked(this, meshAddress, lockedValue, nonce));
-        require(hash.toEthSignedMessageHash().recover(signature) == _holder, "Incorrect Signer"); 
+        require(hash.toEthSignedMessageHash().recover(signature) == _holder, "Incorrect Signer");
         // Invalidate the nonce
         authenticationNonce[_holder][nonce] = true;
         require(IERC20(polyToken).balanceOf(_holder) > uint256(0), "Insufficient funds");
@@ -93,7 +93,7 @@ contract PolyLocker is PolyLockerStorage {
         }
 
         // Make sure balance is divisible by 10e18
-        require(_senderBalance.div(10 ** 18) > uint256(1), "Minimum amount to transfer to Polymesh is 1 POLY");
+        require(_senderBalance.div(10 ** 18) > uint256(1), "Minimum amount to transfer to Polymesh is 1 POLYX");
 
         // Polymesh balances have 6 decimal places.
         // 1 POLY on Ethereum has 18 decimal places. 1 POLY on Polymesh has 6 decimal places.
@@ -101,8 +101,7 @@ contract PolyLocker is PolyLockerStorage {
 
         // Transfer funds to the contract
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
-        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance);
+        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
         noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
     }
-    
 }
