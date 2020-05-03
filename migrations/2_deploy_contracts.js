@@ -6,7 +6,7 @@ module.exports = function(deployer, network, accounts) {
 
     let owner;
     let polyTokenAddress;
-    if (network === "development" || network === "coverage" || network === "dev") {
+    if (network === "development" || network === "coverage" || network === "develop") {
       owner = accounts[0];
       deployer.deploy(PolyToken, {from: owner}).then(() => {
         return PolyToken.deployed();
@@ -15,13 +15,13 @@ module.exports = function(deployer, network, accounts) {
       })
     } else if (network === "kovan") {
       owner = accounts[0];
-      polyTokenAddress = "0xb347b9f5b56b431b2cf4e1d90a5995f7519ca792";
+      polyTokenAddress = web3.utils.toChecksumAddress("0xb347b9f5b56b431b2cf4e1d90a5995f7519ca792");
     } else if (network === "goerli") {
       owner = accounts[0];
-      polyTokenAddress = "0x5af7f19575c1b0638994158e1137698701a18c67";
+      polyTokenAddress = web3.utils.toChecksumAddress("0x5af7f19575c1b0638994158e1137698701a18c67");
     } else if (network === "mainnet") {
       owner = accounts[0];
-      polyTokenAddress = "0x9992eC3cF6A55b00978cdDF2b27BC6882d88D1eC";
+      polyTokenAddress = web3.utils.toChecksumAddress("0x9992eC3cF6A55b00978cdDF2b27BC6882d88D1eC");
     }
         
     // Deploy the contract set over the selected network

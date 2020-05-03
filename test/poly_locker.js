@@ -39,8 +39,8 @@ contract("PolyLocker", async(accounts) => {
         ACCOUNT5 = accounts[5];
 
 
-        POLYTOKEN = await PolyToken.new();
-        POLYLOCKER = await PolyLocker.new();
+        POLYTOKEN = await PolyToken.new({from: OWNER});
+        POLYLOCKER = await PolyLocker.new({from: OWNER});
         POLYLOCKERPROXY = await PolyLockerProxy.new("1.0.0", POLYLOCKER.address, POLYTOKEN.address, {from: OWNER});
 
         console.log(`
