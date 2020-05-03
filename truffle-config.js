@@ -18,6 +18,12 @@ module.exports = {
       network_id: '*', // Match any network id
       gas: 7900000,
     },
+    develop: {
+      host: 'localhost',
+      port: 8545,
+      network_id: '*', // Match any network id
+      gas: 7900000,
+    },
     mainnet: {
       provider: () => {
         return new HDWalletProvider(process.env.PRIVATE_KEY, process.env.MAINNET_ENDPOINT)
