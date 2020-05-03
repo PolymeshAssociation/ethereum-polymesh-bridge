@@ -20,21 +20,46 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import "./PolyLockerStorage.sol";
+import "./proxies//ProxyOwner.sol";
 
 /**
  * @title Contract used to lock POLY corresponds to locked amount user can claim same
  * amount of POLY on Polymesh blockchain
  */
 
-contract PolyLocker is PolyLockerStorage {
+contract PolyLocker is PolyLockerStorage, ProxyOwner {
 
     using SafeMath for uint256;
     using ECDSA for bytes32;
 
     // Emit an event when the poly gets lock
     event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance, uint256 _polyTokenBalance);
+    // Emitted when locking is frozen
+    event Frozen();
+    // Emitted when locking is unfrozen
+    event Unfrozen();
 
     constructor () public  {
+    }
+
+    /**
+     * @notice Used for freezing locking of POLY token
+     */
+    function freezeLocking() external {
+        require(msg.sender == __upgradeabilityOwner, "Unauthorized");
+        require(!frozen, "Already frozen");
+        frozen = true;
+        emit Frozen();
+    }
+
+    /**
+     * @notice Used for unfreezing locking of POLY token
+     */
+    function unfreezeLocking() external {
+        require(msg.sender == __upgradeabilityOwner, "Unauthorized");
+        require(frozen, "Already unfrozen");
+        frozen = false;
+        emit Unfrozen();
     }
 
     /**
@@ -83,9 +108,11 @@ contract PolyLocker is PolyLockerStorage {
     }
 
     function _lock(string memory _meshAddress, address _holder, uint256 _senderBalance) internal {
+        // Make sure locking is not frozen
+        require(!frozen, "Locking frozen");
         // Validate the MESH address
         require(bytes(_meshAddress).length == VALID_ADDRESS_LENGTH, "Invalid length of mesh address");
-        // Check the valid granularity, It should be 10^9 if not then transfer only 10^9 granularity funds
+        // Check the valid granularity, It should be 10^6 if not then transfer only 10^6 granularity funds
         // rest will reamin as dust in the sender account
         if (_senderBalance % TRUNCATE_SCALE != 0) {
             _senderBalance = _senderBalance.div(TRUNCATE_SCALE);
@@ -101,7 +128,7 @@ contract PolyLocker is PolyLockerStorage {
 
         // Transfer funds to the contract
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
-        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
         noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
+        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
     }
 }

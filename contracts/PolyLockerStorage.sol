@@ -8,4 +8,5 @@ contract PolyLockerStorage {
     uint256 constant public TRUNCATE_SCALE = 10 ** 12; // Granularity available on Polymesh blockchain
     uint256 constant public VALID_ADDRESS_LENGTH = 48; // Valid address length of Polymesh blockchain
     mapping(address => mapping(uint256 => bool)) authenticationNonce; // Nonce for authentication
+    bool public frozen; //Controls if locking Poly is frozen or not
 }
