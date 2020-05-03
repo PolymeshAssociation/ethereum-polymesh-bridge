@@ -36,8 +36,7 @@ module.exports = function(deployer, network, accounts) {
         PolyLockerProxyAddress:           ${PolyLockerProxy.address}
         PolyToken:                        ${polyTokenAddress}
         --------------------------------------------------------------------------------
-      `)
-      console.log(PolyLockerProxy);
+      `);
     }).catch((err) => {
       console.log(`Fail in deployment ${err}`);
     }); 
