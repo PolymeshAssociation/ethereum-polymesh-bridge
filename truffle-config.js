@@ -14,18 +14,18 @@ module.exports = {
   networks: {
     development: {
       host: 'localhost',
-      port: 9000,
+      port: 8545,
       network_id: '*', // Match any network id
       gas: 7900000,
     },
-    // Added to make it compatible with truffle testing environment
+    // Added to make it compatible with truffle testing environment (For local test)
     develop: {
       host: 'localhost',
       port: 8545,
       network_id: '*', // Match any network id
       gas: 7900000,
     },
-    // Added to make it compatible with truffle testing environment
+    // Added to make it compatible with truffle testing environment (For Truffle CI)
     test: {
       host: 'localhost',
       port: 8545,
