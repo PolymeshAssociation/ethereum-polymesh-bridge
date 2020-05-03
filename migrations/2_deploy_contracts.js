@@ -6,7 +6,7 @@ module.exports = function(deployer, network, accounts) {
 
     let owner;
     let polyTokenAddress;
-    if (network === "development" || network === "coverage") {
+    if (network === "development" || network === "coverage" || network === "dev") {
       owner = accounts[0];
       deployer.deploy(PolyToken, {from: owner}).then(() => {
         return PolyToken.deployed();
