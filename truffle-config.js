@@ -18,7 +18,15 @@ module.exports = {
       network_id: '*', // Match any network id
       gas: 7900000,
     },
+    // Added to make it compatible with truffle testing environment
     develop: {
+      host: 'localhost',
+      port: 8545,
+      network_id: '*', // Match any network id
+      gas: 7900000,
+    },
+    // Added to make it compatible with truffle testing environment
+    test: {
       host: 'localhost',
       port: 8545,
       network_id: '*', // Match any network id
