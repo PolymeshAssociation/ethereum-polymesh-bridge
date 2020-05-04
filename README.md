@@ -36,15 +36,12 @@ npm run compile
 ```
 npm run test
 ```
+# Contracts Deployment
 
-### Deployment to Testnet
-To deploy to testnet, set 3 ENV variables when running migration:
+## Kovan
 
-- PRIVATE_KEY
-- KOVAN_ENDPOINT
-- POLY_TOKEN_ADDRESS 
-
-Deployed contract addresses are written to `contracts.json` file in project root folder.
-```
-PRIVATE_KEY= KOVAN_ENDPOINT=https://kovan.infura.io/v3/ POLY_TOKEN_ADDRESS=0x0 truffle migrate --network kovan
-```
+| Contracts | Address |
+|------------|--------|
+|PolyLockerAddress (logic): | [0xBA42fFd0cF7addC4dd4f424d85ECbE1531861F0b](https://kovan.etherscan.io/address/0xBA42fFd0cF7addC4dd4f424d85ECbE1531861F0b)|
+|PolyLockerProxyAddress: | [0x173A322B1580CF41CC8339AFA1be3a1e13216f7d](https://kovan.etherscan.io/address/0x173A322B1580CF41CC8339AFA1be3a1e13216f7d) |
+|PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
