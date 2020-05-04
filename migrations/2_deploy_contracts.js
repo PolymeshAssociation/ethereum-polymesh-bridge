@@ -25,7 +25,7 @@ module.exports = function(deployer, network, accounts) {
     }
         
     // Deploy the contract set over the selected network
-    return deployer.deploy(PolyLocker, {from: owner}).then(() => {
+    deployer.deploy(PolyLocker, {from: owner}).then(() => {
       return PolyLocker.deployed();
     }).then((_polyLocker) => {
           return deployer.deploy(PolyLockerProxy, "1.0.0", _polyLocker.address, polyTokenAddress, {from: owner});
