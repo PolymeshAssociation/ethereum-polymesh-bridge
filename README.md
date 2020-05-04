@@ -36,3 +36,15 @@ npm run compile
 ```
 npm run test
 ```
+
+### Deployment to Testnet
+To deploy to testnet, set 3 ENV variables when running migration:
+
+- PRIVATE_KEY
+- KOVAN_ENDPOINT
+- POLY_TOKEN_ADDRESS 
+
+Deployed contract addresses are written to `contracts.json` file in project root folder.
+```
+PRIVATE_KEY= KOVAN_ENDPOINT=https://kovan.infura.io/v3/ POLY_TOKEN_ADDRESS=0x0 truffle migrate --network kovan
+```

@@ -33,7 +33,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     using ECDSA for bytes32;
 
     // Emit an event when the poly gets lock
-    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _value);
+    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance, uint256 _polyTokenBalance);
     // Emitted when locking is frozen
     event Frozen();
     // Emitted when locking is unfrozen
@@ -114,16 +114,21 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         require(bytes(_meshAddress).length == VALID_ADDRESS_LENGTH, "Invalid length of mesh address");
         // Check the valid granularity, It should be 10^6 if not then transfer only 10^6 granularity funds
         // rest will reamin as dust in the sender account
-        if (_senderBalance % VALID_GRANULARITY != 0) {
-            _senderBalance = _senderBalance.div(VALID_GRANULARITY);
-            _senderBalance = _senderBalance.mul(VALID_GRANULARITY);
+        if (_senderBalance % TRUNCATE_SCALE != 0) {
+            _senderBalance = _senderBalance.div(TRUNCATE_SCALE);
+            _senderBalance = _senderBalance.mul(TRUNCATE_SCALE);
         }
-        // Check whether the senderBalance is greater than 0 or not
-        require(_senderBalance > uint256(0), "Invalid locked amount");
+
+        // Make sure balance is divisible by 10e18
+        require(_senderBalance.div(10 ** 18) > uint256(1), "Minimum amount to transfer to Polymesh is 1 POLYX");
+
+        // Polymesh balances have 6 decimal places.
+        // 1 POLY on Ethereum has 18 decimal places. 1 POLY on Polymesh has 6 decimal places.
+        uint256 polymeshBalance = _senderBalance.div(TRUNCATE_SCALE);
+
         // Transfer funds to the contract
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
         noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
-        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, _senderBalance);
+        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
     }
-
 }

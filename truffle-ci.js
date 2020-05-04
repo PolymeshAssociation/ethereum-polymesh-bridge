@@ -19,20 +19,20 @@ module.exports = {
     },
     compilers: {
         solc: {
-        version: "native",
-        settings: {
-            optimizer: {
-            enabled: true,
-            runs: 200
+            version: "native",
+            settings: {
+                optimizer: {
+                    enabled: true,
+                    runs: 200
+                }
             }
-        }
         }
     },
     mocha: {
         enableTimeouts: false,
         reporter: "mocha-junit-reporter",
         reporterOptions: {
-        mochaFile: './test-results/mocha/results.xml'
+            mochaFile: './test-results/mocha/results.xml'
         }
     }
 };
