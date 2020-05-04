@@ -120,7 +120,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         }
 
         // Make sure balance is divisible by 10e18
-        require(_senderBalance.div(10 ** 18) > uint256(1), "Minimum amount to transfer to Polymesh is 1 POLYX");
+        require(_senderBalance.div(10 ** 18) >= uint256(1), "Minimum amount to transfer to Polymesh is 1 POLYX");
 
         // Polymesh balances have 6 decimal places.
         // 1 POLY on Ethereum has 18 decimal places. 1 POLY on Polymesh has 6 decimal places.
