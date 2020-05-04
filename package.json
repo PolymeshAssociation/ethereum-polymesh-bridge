@@ -12,7 +12,6 @@
     "openzeppelin-solidity": "2.2.0",
     "solidity-coverage": "^0.6.7",
     "truffle": "5.1.23",
-    "truffle-flattener": "^1.4.4",
     "truffle-hdwallet-provider": "^1.0.17",
     "web3": "1.2.7"
   },
