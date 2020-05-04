@@ -42,6 +42,9 @@ module.exports = {
       gasPrice: 10000000000
     },
     kovan: {
+      provider: () => {
+        return new HDWalletProvider(process.env.PRIVATE_KEY, process.env.KOVAN_ENDPOINT)
+      },
       network_id: '42', // Match any network id
       gasPrice: 5000000000 // 5 gwei
     },
