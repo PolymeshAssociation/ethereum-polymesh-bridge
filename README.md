@@ -42,6 +42,6 @@ npm run test
 
 | Contracts | Address |
 |------------|--------|
-|PolyLockerAddress (logic): | [0xBA42fFd0cF7addC4dd4f424d85ECbE1531861F0b](https://kovan.etherscan.io/address/0xBA42fFd0cF7addC4dd4f424d85ECbE1531861F0b)|
-|PolyLockerProxyAddress: | [0x173A322B1580CF41CC8339AFA1be3a1e13216f7d](https://kovan.etherscan.io/address/0x173A322B1580CF41CC8339AFA1be3a1e13216f7d) |
+|PolyLockerAddress (logic): | [0x7528477C82093f11d5066f8A60ac9f9cB62B5A34](https://kovan.etherscan.io/address/0x7528477C82093f11d5066f8A60ac9f9cB62B5A34)|
+|PolyLockerProxyAddress: | [0x3684208173b25aacCD38a58a73f66184f5667C11](https://kovan.etherscan.io/address/0x3684208173b25aacCD38a58a73f66184f5667C11) |
 |PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |

@@ -13,7 +13,7 @@ module.exports = function(deployer, network, accounts) {
       }).then((_polyToken) => {
         polyTokenAddress = _polyToken.address;
       })
-    } else if (network === "kovan") {
+    } else if (network === "kovan" || network === "kovan-fork") {
       owner = accounts[0];
       polyTokenAddress = web3.utils.toChecksumAddress("0xb347b9f5b56b431b2cf4e1d90a5995f7519ca792");
     } else if (network === "goerli") {
