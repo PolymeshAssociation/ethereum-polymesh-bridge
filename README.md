@@ -45,3 +45,11 @@ npm run test
 |PolyLockerAddress (logic): | [0x7528477C82093f11d5066f8A60ac9f9cB62B5A34](https://kovan.etherscan.io/address/0x7528477C82093f11d5066f8A60ac9f9cB62B5A34)|
 |PolyLockerProxyAddress: | [0x3684208173b25aacCD38a58a73f66184f5667C11](https://kovan.etherscan.io/address/0x3684208173b25aacCD38a58a73f66184f5667C11) |
 |PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
+
+## Kovan (Ethereum) <-> Aldebaran (Polymesh testnet)
+
+| Contracts | Address |
+|------------|--------|
+|PolyLockerAddress (logic): | [0xcA7f6CdB0A9384354E998b44270E8b490C772b78](https://kovan.etherscan.io/address/0xcA7f6CdB0A9384354E998b44270E8b490C772b78)|
+|PolyLockerProxyAddress: | [0x5A0689dB080e63EB1C8F091239B9532Db10B0206](https://kovan.etherscan.io/address/0x5A0689dB080e63EB1C8F091239B9532Db10B0206) |
+|PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
