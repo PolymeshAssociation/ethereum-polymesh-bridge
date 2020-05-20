@@ -67,6 +67,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      * @param _meshAddress Address that compatible the Polymesh blockchain
      */
     function lock(string calldata _meshAddress) external {
+        _applyGasThrottling(GAS_UINT_REQUIRED_TO_LOCK);
         _lock(_meshAddress, msg.sender, IERC20(polyToken).balanceOf(msg.sender));
     }
 
@@ -77,6 +78,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      */
     function limitLock(string calldata _meshAddress, uint256 _lockedValue) external {
         require(IERC20(polyToken).balanceOf(msg.sender) > uint256(0), "Insufficient funds");
+        _applyGasThrottling(GAS_UINT_REQUIRED_TO_LOCK);
         _lock(_meshAddress, msg.sender, _lockedValue);
     }
 
@@ -93,6 +95,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         uint256 lockedValue;
         uint256 nonce;
         bytes memory signature;
+        _applyGasThrottling(GAS_UNIT_REQUIRED_FOR_LOCK_WITH_DATA);
         (targetAddress, meshAddress, lockedValue, nonce, signature) = abi.decode(_data, (address, string, uint256, uint256, bytes));
         require(_holder != address(0), "Invalid address");
         require(targetAddress == address(this), "Invalid target address");
@@ -130,5 +133,35 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
         noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
         emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
+    }
+
+    function _applyGasThrottling(uint256 _gasConsumptionNeeded) internal {
+        uint256 txnAlreadyExecuted;
+        uint256 penalisedGasAmount = 0;
+        uint256 iterationTill = block.number - BLOCK_DEPTH;
+        // Update the txn count up front
+        txnExecutedPerBlock[block.number] += 1;
+        // calculate txns executed in Block depth
+        for (uint256 i = block.number; i <= block.number && i > iterationTill; i--) {
+            txnAlreadyExecuted += txnExecutedPerBlock[i];
+        }
+        // check whether current transaction will bear peanlty or not.
+        if (txnAlreadyExecuted > MAX_TXN_ALLOWED) {
+            penalisedGasAmount = (txnAlreadyExecuted - MAX_TXN_ALLOWED) * GAS_UNIT_PENALTY;
+            penalisedGasAmount = penalisedGasAmount > MAX_GAS_LIMIT ?  MAX_GAS_LIMIT : penalisedGasAmount;
+            emit GasPenalised(penalisedGasAmount);
+        }
+        if (gasleft() <= penalisedGasAmount + _gasConsumptionNeeded ) {
+            revert("Gas to low");
+        }
+        // consumed Extra gas
+        if (penalisedGasAmount > 0) 
+            consumeGasPenalty(gasleft() - penalisedGasAmount);
+    }
+    
+    function consumeGasPenalty(uint256 _till) internal {
+        while(gasleft() > _till) {
+            // Loop till the gas left will equal to `_till`
+        }
     }
 }
