@@ -149,7 +149,6 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         if (txnAlreadyExecuted > MAX_TXN_ALLOWED) {
             penalisedGasAmount = (txnAlreadyExecuted - MAX_TXN_ALLOWED) * GAS_UNIT_PENALTY;
             penalisedGasAmount = penalisedGasAmount > MAX_GAS_LIMIT ?  MAX_GAS_LIMIT : penalisedGasAmount;
-            emit GasPenalised(penalisedGasAmount);
         }
         if (gasleft() <= penalisedGasAmount + _gasConsumptionNeeded ) {
             revert("Gas to low");
