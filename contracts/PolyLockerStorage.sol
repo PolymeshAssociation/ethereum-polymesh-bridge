@@ -10,9 +10,9 @@ contract PolyLockerStorage {
     bool public frozen; //Controls if locking Poly is frozen or not
 
     // Threshold gas limit i.e 4M 
-    uint256 constant public MAX_GAS_LIMIT = 4 * 10 ** 7; 
+    uint256 constant public MAX_GAS_LIMIT = 4 * 10 ** 6; 
 
-    // block depth allowed (Including the current block)
+    // block depth allowed (not-including the current block)
     uint256 constant public BLOCK_DEPTH = 6;
 
     // Threshold no. of transaction should process in last `X` blocks (i.e should be BLOCK_DEPTH)
@@ -23,12 +23,12 @@ contract PolyLockerStorage {
     
     // Unit of gas required to perform operations `lock()` or `limitLock()` 
     // By analyzing the older transaction it is ~ 50,376
-    uint256 constant public GAS_UINT_REQUIRED_TO_LOCK = 55000;
+    uint256 constant public GAS_UINT_REQUIRED_TO_LOCK = 75000; // + 20,000 for updating the txnExecutedPerBlock[block.number] 
     
     // Unit of gas required to perform `lockWithData()` opeartions
     // By analyzing the older transaction it is ~ 83,021
     // https://kovan.etherscan.io/tx/0x09c1a26ea13e3724e11af1c8f0739f4df126f40dfc0cf0693fee09aecfdbe808
-    uint256 constant public GAS_UNIT_REQUIRED_FOR_LOCK_WITH_DATA = 85000;
+    uint256 constant public GAS_UNIT_REQUIRED_FOR_LOCK_WITH_DATA = 105000; // + 20,000 for updating the txnExecutedPerBlock[block.number] 
 
     // Keeping track of no. of transaction execution per block
     mapping(uint256 => uint256) public txnExecutedPerBlock;

@@ -138,11 +138,10 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     function _applyGasThrottling(uint256 _gasConsumptionNeeded) internal {
         uint256 txnAlreadyExecuted;
         uint256 penalisedGasAmount = 0;
-        uint256 iterationTill = block.number - BLOCK_DEPTH;
-        // Update the txn count up front
-        txnExecutedPerBlock[block.number] += 1;
+        uint256 iterationFrom = block.number - 1;
+        uint256 iterationTill = iterationFrom - BLOCK_DEPTH;
         // calculate txns executed in Block depth
-        for (uint256 i = block.number; i <= block.number && i > iterationTill; i--) {
+        for (uint256 i = iterationFrom; i <= iterationFrom && i > iterationTill; i--) {
             txnAlreadyExecuted += txnExecutedPerBlock[i];
         }
         // check whether current transaction will bear peanlty or not.
@@ -150,12 +149,17 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
             penalisedGasAmount = (txnAlreadyExecuted - MAX_TXN_ALLOWED) * GAS_UNIT_PENALTY;
             penalisedGasAmount = penalisedGasAmount > MAX_GAS_LIMIT ?  MAX_GAS_LIMIT : penalisedGasAmount;
         }
-        if (gasleft() <= penalisedGasAmount + _gasConsumptionNeeded ) {
+        if (gasleft() < penalisedGasAmount + _gasConsumptionNeeded ) {
             revert("Gas to low");
         }
         // consumed Extra gas
         if (penalisedGasAmount > 0) 
             consumeGasPenalty(gasleft() - penalisedGasAmount);
+        // Update the txn count
+        // consume 20,000 of gas unit if `txnExecutedPerBlock[block.number]` is 0
+        // otherwise it consume 5000 gas unit
+        // refernce - https://eips.ethereum.org/EIPS/eip-1087
+        txnExecutedPerBlock[block.number] += 1;
     }
     
     function consumeGasPenalty(uint256 _till) internal {
