@@ -12,7 +12,7 @@ contract PolyLockerStorage {
     // Threshold gas limit i.e 4M 
     uint256 constant public MAX_GAS_LIMIT = 4 * 10 ** 7; 
 
-    // block depth allowed
+    // block depth allowed (Including the current block)
     uint256 constant public BLOCK_DEPTH = 6;
 
     // Threshold no. of transaction should process in last `X` blocks (i.e should be BLOCK_DEPTH)
