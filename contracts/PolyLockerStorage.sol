@@ -21,14 +21,9 @@ contract PolyLockerStorage {
     // Unit of gas increased per transaction i.e 500K
     uint256 constant public GAS_UNIT_PENALTY = 5 * 10 ** 5;
     
-    // Unit of gas required to perform operations `lock()` or `limitLock()` 
+    // Unit of gas required to perform operations `_lock()`
     // By analyzing the older transaction it is ~ 50,376
-    uint256 constant public GAS_UINT_REQUIRED_TO_LOCK = 75000; // + 20,000 for updating the txnExecutedPerBlock[block.number] 
-    
-    // Unit of gas required to perform `lockWithData()` opeartions
-    // By analyzing the older transaction it is ~ 83,021
-    // https://kovan.etherscan.io/tx/0x09c1a26ea13e3724e11af1c8f0739f4df126f40dfc0cf0693fee09aecfdbe808
-    uint256 constant public GAS_UNIT_REQUIRED_FOR_LOCK_WITH_DATA = 105000; // + 20,000 for updating the txnExecutedPerBlock[block.number] 
+    uint256 constant public GAS_UINT_REQUIRED_TO_LOCK = 75000; // + 20,000 for updating the txnExecutedPerBlock[block.number]  
 
     // Keeping track of no. of transaction execution per block
     mapping(uint256 => uint256) public txnExecutedPerBlock;
