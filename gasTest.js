@@ -2,7 +2,7 @@ const Web3 = require("web3");
 const BN = Web3.utils.BN;
 require("dotenv").config();
 
-const web3 = new Web3(new Web3.providers.WebsocketProvider(process.env.KOVAN_ENDPOINT));
+const web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_ENDPOINT));
 const polyLockerProxyAddress = web3.utils.toChecksumAddress(process.env.POLY_LOCKER_PROXY_ADDRESS);
 const polyTokenAddress = web3.utils.toChecksumAddress(process.env.POLY_TOKEN_ADDRESS);
 const from = web3.utils.toChecksumAddress(process.env.GAS_PAYER);
@@ -123,6 +123,10 @@ async function testGas(type) {
                 let txData = polyLocker.methods.limitLock(process.env.DUMMY_MESH_ADDRESS, web3.utils.toWei("1")).encodeABI();
                 let estimatedGas = await polyLocker.methods.limitLock(process.env.DUMMY_MESH_ADDRESS, web3.utils.toWei("1")).estimateGas({from: from});
                 console.log(`Estimated gas for the Poly LimitLock txn no. ${i} - ${estimatedGas}`); 
+                if (i > 5) {
+                    estimatedGas = 500000 + 92272; // Penalty + actual usage
+                    console.log(`Manual Estimated gas for the Poly LimitLock txn no. ${i} - ${estimatedGas}`); 
+                }
                 await sendSignedTransaction(from, polyLockerProxyAddress, parseInt(estimatedGas * 1.2), 0, txData);
             }
         }
@@ -132,7 +136,7 @@ async function testGas(type) {
             // of the transaction performed after burst those should consume 4M
 
             for (let i = 0; i < 7; i++) {
-                if (i == 1) {
+                if (i == 2) {
                     console.log("Submit a burst");
                     console.log(`Balance of the Burst contract: ${web3.utils.fromWei((await polyToken.methods.balanceOf(burstContractAddress).call()).toString())} POLY`);
 
@@ -153,14 +157,18 @@ async function testGas(type) {
                         await sendSignedTransaction(from, burstContractAddress, parseInt(estimatedGas * 1.2), 0, txData);
                     } 
 
-                    let txData = burstTxns.methods.burstPolyLimitLock(polyLockerProxyAddress, 9, process.env.DUMMY_MESH_ADDRESS).encodeABI();
-                    let estimatedGas = await burstTxns.methods.burstPolyLimitLock(polyLockerProxyAddress, 9, process.env.DUMMY_MESH_ADDRESS).estimateGas({from: from});
+                    let txData = burstTxns.methods.burstPolyLimitLock(polyLockerProxyAddress, 11, process.env.DUMMY_MESH_ADDRESS).encodeABI();
+                    let estimatedGas = await burstTxns.methods.burstPolyLimitLock(polyLockerProxyAddress, 11, process.env.DUMMY_MESH_ADDRESS).estimateGas({from: from});
                     console.log(`Estimated gas for the burst txn no. ${i} - ${estimatedGas}`); 
                     await sendSignedTransaction(from, burstContractAddress, parseInt(estimatedGas * 1.1), 0, txData);
                 } else {
                     let txData = polyLocker.methods.limitLock(process.env.DUMMY_MESH_ADDRESS, web3.utils.toWei("1")).encodeABI();
                     let estimatedGas = await polyLocker.methods.limitLock(process.env.DUMMY_MESH_ADDRESS, web3.utils.toWei("1")).estimateGas({from: from});
                     console.log(`Estimated gas for the Poly LimitLock txn no. ${i} - ${estimatedGas}`); 
+                    if (i > 2) {
+                        estimatedGas = 4000000 + 92272; // Penalty + actual usage
+                        console.log(`Manual Estimated gas for the Poly LimitLock txn no. ${i} - ${estimatedGas}`); 
+                    }
                     await sendSignedTransaction(from, polyLockerProxyAddress, parseInt(estimatedGas * 1.2), 0, txData);
                 }
             }
