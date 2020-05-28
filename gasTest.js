@@ -202,4 +202,4 @@ async function sendSignedTransaction(fromAddress, toAddress, gasLimit, value, tx
     `);
 }
 
-testGas(2);
+testGas(1);

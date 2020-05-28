@@ -13,10 +13,10 @@ contract PolyLockerStorage {
     uint256 constant public MAX_GAS_LIMIT = 4 * 10 ** 6; 
 
     // block depth allowed (not-including the current block)
-    uint256 constant public BLOCK_DEPTH = 6;
+    uint256 constant public BLOCK_DEPTH = 120; // For Aldebaran
 
     // Threshold no. of transaction should process in last `X` blocks (i.e should be BLOCK_DEPTH)
-    uint256 constant public MAX_TXN_ALLOWED = 5;
+    uint256 constant public MAX_TXN_ALLOWED = 200; // For Aldebaran
 
     // Unit of gas increased per transaction i.e 500K
     uint256 constant public GAS_UNIT_PENALTY = 5 * 10 ** 5;
