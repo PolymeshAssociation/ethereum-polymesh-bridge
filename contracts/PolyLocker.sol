@@ -20,7 +20,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import "./PolyLockerStorage.sol";
-import "./proxies//ProxyOwner.sol";
+import "./proxies/ProxyOwner.sol";
 
 /**
  * @title Contract used to lock POLY corresponds to locked amount user can claim same
@@ -46,7 +46,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      * @notice Used for freezing locking of POLY token
      */
     function freezeLocking() external {
-        require(msg.sender == __upgradeabilityOwner, "Unauthorized");
+        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
         require(!frozen, "Already frozen");
         frozen = true;
         emit Frozen();
@@ -56,7 +56,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      * @notice Used for unfreezing locking of POLY token
      */
     function unfreezeLocking() external {
-        require(msg.sender == __upgradeabilityOwner, "Unauthorized");
+        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
         require(frozen, "Already unfrozen");
         frozen = false;
         emit Unfrozen();
