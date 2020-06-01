@@ -8,12 +8,28 @@ import "./ProxyOwner.sol";
  * @dev This contract combines an upgradeability proxy with basic authorization control functionalities
  */
 contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
-    string internal __proposedVersion;
-    address internal __proposedImplementation;
-    bytes internal __data;
-    uint256 internal __proposeUpgradeAt;
+    
+    // Proposed version of the logic contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.string.length.proposedVersion"));
+    bytes32 private constant PROPOSED_VERSION_LENGTH_SLOT = 0xdbddd175850e0907628e5271011fae280d8867f4a1db18a0fca922c3845a9ea0;
 
-    uint256 constant internal COLDPERIOD = 24 hours;
+    // Proposed version of the logic contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.string.value.proposedVersion"));
+    bytes32 private constant PROPOSED_VERSION_VALUE_SLOT = 0xe9f4b4bca347b871ad4f69c59075b91ecb4883d9a04efd6069c5e1c46aad7aeb;
+
+    // Proposed implementation of the logic contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.address.proposedImplementation"));
+    bytes32 private constant PROPOSED_IMPLEMENTATION_SLOT = 0xb9fe889a206ec9c81ab8d5a947511a67ff126e1c3296e248e2610e5fd969cf29;
+
+    // data that need to be used to initialize the contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.data"));
+    bytes32 private constant DATA_SLOT = 0xd68a912498565b3034fefdc74fbf559040c8b4ca0da1afd5c1ab61999a766e31;
+    
+    // data that need to be used to initialize the contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.uint256.proposedUpgradeAt"));
+    bytes32 private constant PROPOSED_UPGRADE_AT_SLOT = 0x618b18b24d5c1cc6e79cb6baf77c8932cfdde5c53bed71d6bead3d9d7123df80;
+
+    uint256 constant internal COLDPERIOD = 30 minutes;
 
     /**
     * @dev Event to show ownership has been transferred
@@ -41,29 +57,6 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     }
 
     /**
-    * @dev Tells the address of the owner
-    * @return the address of the owner
-    */
-    function _upgradeabilityOwner() internal view returns(address) {
-        return __upgradeabilityOwner;
-    }
-
-    /**
-    * @dev Sets the address of the owner
-    */
-    function _setUpgradeabilityOwner(address _newUpgradeabilityOwner) internal {
-        require(_newUpgradeabilityOwner != address(0), "Address should not be 0x");
-        __upgradeabilityOwner = _newUpgradeabilityOwner;
-    }
-
-    /**
-    * @notice Internal function to provide the address of the implementation contract
-    */
-    function _implementation() internal view returns(address) {
-        return __implementation;
-    }
-
-    /**
     * @dev Tells the address of the proxy owner
     * @return the address of the proxy owner
     */
@@ -76,7 +69,7 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     * @return string representing the name of the current version
     */
     function version() external ifOwner returns(string memory) {
-        return __version;
+        return _version();
     }
 
     /**
@@ -106,18 +99,18 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     * signature of the implementation to be called with the needed payload
     */
     function proposeUpgrade(string calldata _newVersion, address _newImplementation, bytes calldata _data) external ifOwner {
-        __proposeUpgradeAt = now;
-        __proposedVersion = _newVersion;
-        __proposedImplementation = _newImplementation;
-        __data = _data;
+        _setProposeUpgradeAt(now);
+        _setProposedVersion(_newVersion);
+        _setProposedImplementation(_newImplementation);
+        _setData(_data);
     }
 
     /**
     * @dev Allows the upgradeability owner to upgrade the current version of the proxy.
     */
     function upgradeTo() external ifOwner {
-        require(now > (__proposeUpgradeAt + COLDPERIOD), "Proposal is in unmatured state");
-        _upgradeTo(__proposedVersion, __proposedImplementation);
+        require(now > (_proposeUpgradeAt() + COLDPERIOD), "Proposal is in unmatured state");
+        _upgradeTo(_proposedVersion(), _proposedImplementation());
     }
 
     /**
@@ -125,8 +118,8 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     * to initialize whatever is needed through a low level call.
     */
     function upgradeToAndCall() external payable ifOwner {
-        require(now > (__proposeUpgradeAt + COLDPERIOD), "Proposal is in unmatured state");
-        _upgradeToAndCall(__proposedVersion, __proposedImplementation, __data);
+        require(now > (_proposeUpgradeAt() + COLDPERIOD), "Proposal is in unmatured state");
+        _upgradeToAndCall(_proposedVersion(), _proposedImplementation(), _data());
     }
 
     function _upgradeToAndCall(string memory _newVersion, address _newImplementation, bytes memory _data) internal {
@@ -137,4 +130,90 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
         require(success, "Fail in executing the function of implementation contract");
     }
 
+
+    /**
+    * @notice Internal function to get the proposed upgrade timestamp
+    */
+    function _proposeUpgradeAt() internal view returns(uint256 upgradeAt) {
+        bytes32 slot = PROPOSED_UPGRADE_AT_SLOT;
+        assembly {
+            upgradeAt := sload(slot)
+        }
+    }
+
+    /**
+    * @notice Internal function to set the proposed upgrade timestamp
+    */
+    function _setProposeUpgradeAt(uint256 _newProposeUpgradeAt) internal {
+        bytes32 slot = PROPOSED_UPGRADE_AT_SLOT;
+        assembly {
+            sstore(slot, _newProposeUpgradeAt)
+        }
+    }
+
+    /**
+    * @notice Internal function to provide the proposed address of the implementation contract
+    */
+    function _proposedImplementation() internal view returns(address impl) {
+        bytes32 slot = PROPOSED_IMPLEMENTATION_SLOT;
+        assembly {
+            impl := sload(slot)
+        }
+    }
+
+    /**
+    * @notice Internal function to set the proposed address of the implementation contract
+    */
+    function _setProposedImplementation(address _newProposedImplementation) internal {
+        bytes32 slot = PROPOSED_IMPLEMENTATION_SLOT;
+        assembly {
+            sstore(slot, _newProposedImplementation)
+        }
+    }
+
+    /**
+    * @notice Internal function to get the proposed version of the implementation contract
+    */
+    function _proposedVersion() internal view returns(string memory ver) {
+        bytes32 slot1 = PROPOSED_VERSION_LENGTH_SLOT;
+        bytes32 slot2 = PROPOSED_VERSION_VALUE_SLOT;
+        assembly {
+            ver := mload(0x40)
+            mstore(ver, sload(slot1))
+            mstore(add(ver, 0x20), sload(slot2))
+            mstore(0x40, add(ver, 0x40))
+        }
+    }
+
+    /**
+    * @notice Internal function to set the proposed version of the implementation contract
+    */
+    function _setProposedVersion(string memory _newProposedVersion) internal {
+        bytes32 slot1 = PROPOSED_VERSION_LENGTH_SLOT;
+        bytes32 slot2 = PROPOSED_VERSION_VALUE_SLOT;
+        assembly {
+            sstore(slot1, mload(_newProposedVersion)) // length
+            sstore(slot2, mload(add(_newProposedVersion, 0x20))) // value of the string
+        }
+    }
+
+    /**
+    * @notice Internal function to get the proposed data to initialize the implementation contract
+    */
+    function _data() internal view returns(bytes memory data) {
+        bytes32 slot = DATA_SLOT;
+        assembly {
+            data := sload(slot)
+        }
+    }
+
+    /**
+    * @notice Internal function to set the proposed data to initialize the implementation contract
+    */
+    function _setData(bytes memory _newData) internal {
+        bytes32 slot = DATA_SLOT;
+        assembly {
+            sstore(slot, _newData)
+        }
+    }
 }

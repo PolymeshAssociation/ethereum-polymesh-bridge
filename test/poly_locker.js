@@ -318,7 +318,7 @@ contract("PolyLocker", async(accounts) => {
 
         it("Should successfully upgrade", async() => {
             await increaseTime(86470); // 24 hours increase + 70 seconds buffer
-            await POLYLOCKERPROXY.upgradeTo({from: OWNER});
+            let tx = await POLYLOCKERPROXY.upgradeTo({from: OWNER});
             assert.equal(
                 await POLYLOCKERPROXY.implementation.call({from: OWNER}),
                 MOCKPOLYLOCKER.address
