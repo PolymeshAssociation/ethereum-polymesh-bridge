@@ -10,20 +10,24 @@ import "./ProxyOwner.sol";
 contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     
     // Proposed version of the logic contract
-    // calculated using bytes32(uint256(keccak256("polylock.proxy.string.proposedVersion")) - 1);
-    bytes32 private constant PROPOSED_VERSION_SLOT = 0xddfeeef0ac1411aa24c4760ad59fc4359c04ec93e9b3bd869a2e89c595117eea;
+    // calculated using bytes32(keccak256("polyLocker.proxy.string.length.proposedVersion"));
+    bytes32 private constant PROPOSED_VERSION_LENGTH_SLOT = 0xdbddd175850e0907628e5271011fae280d8867f4a1db18a0fca922c3845a9ea0;
+
+    // Proposed version of the logic contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.string.value.proposedVersion"));
+    bytes32 private constant PROPOSED_VERSION_VALUE_SLOT = 0xe9f4b4bca347b871ad4f69c59075b91ecb4883d9a04efd6069c5e1c46aad7aeb;
 
     // Proposed implementation of the logic contract
-    // calculated using bytes32(uint256(keccak256("polylock.proxy.address.proposedImplementation")) -1);
-    bytes32 private constant PROPOSED_IMPLEMENTATION_SLOT = 0x1301f853d87ec41d98f23d4fb7155ed282bd563b311592b078fdad70306616fd;
+    // calculated using bytes32(keccak256("polyLocker.proxy.address.proposedImplementation"));
+    bytes32 private constant PROPOSED_IMPLEMENTATION_SLOT = 0xb9fe889a206ec9c81ab8d5a947511a67ff126e1c3296e248e2610e5fd969cf29;
 
     // data that need to be used to initialize the contract
-    // calculated using bytes32(uint256(keccak256("polylock.proxy.bytes.data")) -1);
-    bytes32 private constant DATA_SLOT = 0xc72c573ea8c2c7729d04d3b26305d9523460c28995af7ecad3356ef46bc25828;
+    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.data"));
+    bytes32 private constant DATA_SLOT = 0xd68a912498565b3034fefdc74fbf559040c8b4ca0da1afd5c1ab61999a766e31;
     
     // data that need to be used to initialize the contract
-    // calculated using bytes32(uint256(keccak256("polylock.proxy.uint256.proposedUpgradeAt")) -1);
-    bytes32 private constant PROPOSED_UPGRADE_AT_SLOT = 0x29c02dae7ff91d9c44ab7aac770c54f5103021450df4af0842c2bc2a7bef92d2;
+    // calculated using bytes32(keccak256("polyLocker.proxy.uint256.proposedUpgradeAt"));
+    bytes32 private constant PROPOSED_UPGRADE_AT_SLOT = 0x618b18b24d5c1cc6e79cb6baf77c8932cfdde5c53bed71d6bead3d9d7123df80;
 
     uint256 constant internal COLDPERIOD = 30 minutes;
 
@@ -171,9 +175,13 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     * @notice Internal function to get the proposed version of the implementation contract
     */
     function _proposedVersion() internal view returns(string memory ver) {
-        bytes32 slot = PROPOSED_VERSION_SLOT;
+        bytes32 slot1 = PROPOSED_VERSION_LENGTH_SLOT;
+        bytes32 slot2 = PROPOSED_VERSION_VALUE_SLOT;
         assembly {
-            ver := sload(slot)
+            ver := mload(0x40)
+            mstore(ver, sload(slot1))
+            mstore(add(ver, 0x20), sload(slot2))
+            mstore(0x40, add(ver, 0x40))
         }
     }
 
@@ -181,9 +189,11 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     * @notice Internal function to set the proposed version of the implementation contract
     */
     function _setProposedVersion(string memory _newProposedVersion) internal {
-        bytes32 slot = PROPOSED_VERSION_SLOT;
+        bytes32 slot1 = PROPOSED_VERSION_LENGTH_SLOT;
+        bytes32 slot2 = PROPOSED_VERSION_VALUE_SLOT;
         assembly {
-            sstore(slot, _newProposedVersion)
+            sstore(slot1, mload(_newProposedVersion)) // length
+            sstore(slot2, mload(add(_newProposedVersion, 0x20))) // value of the string
         }
     }
 
