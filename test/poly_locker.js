@@ -1,6 +1,7 @@
 import { catchRevert } from "./helpers/exceptions";
 import { getSignData } from "./helpers/signData";
 import { increaseTime } from "./helpers/time";
+const abi = require("ethereumjs-abi");
 
 const PolyLocker = artifacts.require("PolyLocker");
 const PolyLockerProxy = artifacts.require("PolyLockerProxy");
@@ -27,6 +28,12 @@ contract("PolyLocker", async(accounts) => {
     let SIGNERPRIVATEKEY;
     let contract_balance = 0;
     let WEB3;
+
+    function encodeProxyCall(parametersType, values) {
+        const methodId = abi.methodID("initialize", parametersType).toString("hex");
+        const params = abi.rawEncode(parametersType, values).toString("hex");
+        return "0x" + methodId + params;
+    }
 
     before(async() => {
 
@@ -329,6 +336,67 @@ contract("PolyLocker", async(accounts) => {
             );
         });
     });
+
+
+    describe("Update the logic contract by keeping events Id in sync", async() => {
+
+        it("Should successfully upgrade", async() => {
+
+            // Perform lot of lock transaction on the older proxy
+            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
+            await POLYTOKEN.getTokens(WEB3.utils.toWei("4000"), ACCOUNT3);
+            let account3_balance = await POLYTOKEN.balanceOf.call(ACCOUNT3);
+            console.log(`Balance of the Account 3 : ${account3_balance}`);
+            await POLYTOKEN.approve(I_POLYLOCKER.address, account3_balance, { from: ACCOUNT3 });
+            for (let i = 0; i < 5; i++) {
+                await I_POLYLOCKER.limitLock(meshAddress, WEB3.utils.toWei("1"), {from: ACCOUNT3});
+            }
+
+            console.log(`No of events emitted by the contract until now : ${await I_POLYLOCKER.noOfeventsEmitted.call()}`);
+
+            // Set of new contracts deployed
+            let PolyLockerNew = await PolyLocker.new();
+            let PolyLockerProxyNew = await PolyLockerProxy.new("1.0.0", PolyLockerNew.address, POLYTOKEN.address, {from: OWNER});
+
+
+            // Propose upgrade on the new set of the Proxy
+            let encodedCallData = encodeProxyCall(["address"], [I_POLYLOCKER.address]);
+            console.log(`Print the encoded callData : ${encodedCallData}`);
+            let POLYLOCKER_NEW = await PolyLocker.new();
+            await PolyLockerProxyNew.proposeUpgrade("1.2.0", POLYLOCKER_NEW.address, encodedCallData, {from: OWNER});
+
+            // should fail to upgrade as cold period is not passed yet
+            await catchRevert(
+                PolyLockerProxyNew.upgradeToAndCall({from: OWNER}),
+                "Proposal is in unmatured state"
+            );
+
+            await increaseTime(1900); // 30 minutes increase + 100 seconds buffer
+            
+
+            // should fail to upgrade as Proxy is not in freeze state
+            await catchRevert(
+                PolyLockerProxyNew.upgradeToAndCall({from: OWNER}),
+                "Fail in executing the function of implementation contract" // custom error string get returned
+            );
+
+            console.log("Freeze test passed");
+
+            let I_POLYLOCKER_NEW = await PolyLocker.at(PolyLockerProxyNew.address);
+            // freeze the contract
+            await I_POLYLOCKER_NEW.freezeLocking({from: OWNER});
+
+            console.log(`Freeze status of the Proxy : ${await I_POLYLOCKER_NEW.frozen.call()}`);
+
+            console.log(`Initialized status of the Proxy : ${await I_POLYLOCKER_NEW.initialized.call()}`);
+
+            // Should upgrade easily 
+            await PolyLockerProxyNew.upgradeToAndCall({from: OWNER});
+
+            // Check the events Id
+            console.log(`No of events emitted after the Proxy change: ${await I_POLYLOCKER.noOfeventsEmitted.call()}`);
+        });
+    })
 
     describe("Test case for freezing and unfreezing locking", async () => {
         it("Should not allow unauthorized address to freeze locking", async () => {

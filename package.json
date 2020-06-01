@@ -23,6 +23,7 @@
     "babel-preset-stage-3": "6.24.1",
     "babel-register": "6.26.0",
     "coveralls": "^3.0.8",
+    "ethereumjs-abi": "^0.6.8",
     "mocha": "^6.2.2",
     "mocha-junit-reporter": "^1.23.1",
     "truffle-flattener": "^1.4.4",

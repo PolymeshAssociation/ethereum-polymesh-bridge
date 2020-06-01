@@ -16,7 +16,8 @@ async function printHash() {
         PROPOSED_VERSION_LENGTH_SLOT    : ${slot("polyLocker.proxy.string.length.proposedVersion")}
         PROPOSED_VERSION_VALUE_SLOT     : ${slot("polyLocker.proxy.string.value.proposedVersion")}
         PROPOSED_IMPLEMENTATION_SLOT    : ${slot("polyLocker.proxy.address.proposedImplementation")}
-        DATA_SLOT                       : ${slot("polyLocker.proxy.bytes.data")}
+        DATA_LENGTH_SLOT                : ${slot("polyLocker.proxy.bytes.length.data")}
+        DATA_VALUE_SLOT                 : ${slot("polyLocker.proxy.bytes.value.data")}
         PROPOSED_UPGRADE_AT_SLOT        : ${slot("polyLocker.proxy.uint256.proposedUpgradeAt")}
     `)
 }

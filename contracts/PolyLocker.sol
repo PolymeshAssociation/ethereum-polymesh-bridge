@@ -21,6 +21,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import "./PolyLockerStorage.sol";
 import "./proxies/ProxyOwner.sol";
+import "./interface/IPolyLocker.sol";
 
 /**
  * @title Contract used to lock POLY corresponds to locked amount user can claim same
@@ -40,6 +41,14 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     event Unfrozen();
 
     constructor () public  {
+        initialized = true;
+    }
+
+    function initialize(address _oldProxy) public {
+        require(frozen, "Proxy should be frozen");
+        require(!initialized, "Already initialized");
+        noOfeventsEmitted = IPolyLocker(_oldProxy).noOfeventsEmitted();
+        initialized = true;
     }
 
     /**

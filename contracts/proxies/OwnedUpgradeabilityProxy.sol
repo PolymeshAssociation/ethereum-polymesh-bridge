@@ -22,8 +22,12 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     bytes32 private constant PROPOSED_IMPLEMENTATION_SLOT = 0xb9fe889a206ec9c81ab8d5a947511a67ff126e1c3296e248e2610e5fd969cf29;
 
     // data that need to be used to initialize the contract
-    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.data"));
-    bytes32 private constant DATA_SLOT = 0xd68a912498565b3034fefdc74fbf559040c8b4ca0da1afd5c1ab61999a766e31;
+    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.length.data"));
+    bytes32 private constant DATA_LENGTH_SLOT = 0xf54f318cf8e75c646a6bd1a15bc91e74327f81e4a3fcc81897561c91481babdb;
+
+    // data that need to be used to initialize the contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.value.data"));
+    bytes32 private constant DATA_VALUE_SLOT = 0x9f5abb88b917fbc206f89a373f6d103515d22d9ae69d6bf5ce47bf9213710b94;
     
     // data that need to be used to initialize the contract
     // calculated using bytes32(keccak256("polyLocker.proxy.uint256.proposedUpgradeAt"));
@@ -201,9 +205,13 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     * @notice Internal function to get the proposed data to initialize the implementation contract
     */
     function _data() internal view returns(bytes memory data) {
-        bytes32 slot = DATA_SLOT;
+        bytes32 slot1 = DATA_LENGTH_SLOT;
+        bytes32 slot2 = DATA_VALUE_SLOT;
         assembly {
-            data := sload(slot)
+            data := mload(0x40)
+            mstore(data, sload(slot1))
+            mstore(add(data, 0x20), sload(slot2))
+            mstore(0x40, add(data, 0x40))
         }
     }
 
@@ -211,9 +219,11 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     * @notice Internal function to set the proposed data to initialize the implementation contract
     */
     function _setData(bytes memory _newData) internal {
-        bytes32 slot = DATA_SLOT;
+        bytes32 slot1 = DATA_LENGTH_SLOT;
+        bytes32 slot2 = DATA_VALUE_SLOT;
         assembly {
-            sstore(slot, _newData)
+            sstore(slot1, mload(_newData)) // length
+            sstore(slot2, mload(add(_newData, 0x20))) // value of the string
         }
     }
 }
