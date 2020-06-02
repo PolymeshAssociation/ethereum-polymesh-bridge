@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:10
+      - image: bakii0499/solidity:latest
     steps:
       - checkout
       - restore_cache:
@@ -17,7 +17,7 @@ jobs:
             - node_modules
   test:
     docker:
-      - image: circleci/node:10
+      - image: bakii0499/solidity:latest
     parallelism: 2
     steps:
       - checkout
@@ -37,7 +37,7 @@ jobs:
           path: ./test-results/mocha/results.xml
   coverage:
     docker:
-      - image: circleci/node:10
+      - image: bakii0499/solidity:latest
     steps:
       - checkout
       - restore_cache:
