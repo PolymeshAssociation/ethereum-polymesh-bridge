@@ -45,7 +45,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     }
 
     function initialize(address _oldProxy) public {
-        require(frozen, "Proxy should be frozen");
+        require(IPolyLocker(_oldProxy).frozen(), "Old Proxy should be frozen");
         require(!initialized, "Already initialized");
         noOfeventsEmitted = IPolyLocker(_oldProxy).noOfeventsEmitted();
         initialized = true;

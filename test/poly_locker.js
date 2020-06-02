@@ -381,13 +381,16 @@ contract("PolyLocker", async(accounts) => {
 
             let I_POLYLOCKER_NEW = await PolyLocker.at(PolyLockerProxyNew.address);
             // freeze the contract
-            await I_POLYLOCKER_NEW.freezeLocking({from: OWNER});
-            assert.isTrue(await I_POLYLOCKER_NEW.frozen.call());
+            await I_POLYLOCKER.freezeLocking({from: OWNER});
+            assert.isTrue(await I_POLYLOCKER.frozen.call());
             assert.isFalse(await I_POLYLOCKER_NEW.initialized.call());
             // Should upgrade easily 
             await PolyLockerProxyNew.upgradeToAndCall({from: OWNER});
             assert.isTrue(await I_POLYLOCKER_NEW.initialized.call());
             assert.equal(eventsEmittedInOldProxy.toString(), (await I_POLYLOCKER.noOfeventsEmitted.call()).toString());
+
+            // Again Unfreeze it 
+            await I_POLYLOCKER.unfreezeLocking({from: OWNER});
         });
     })
 
