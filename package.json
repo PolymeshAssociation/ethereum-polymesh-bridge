@@ -26,6 +26,7 @@
     "ethereumjs-abi": "^0.6.8",
     "mocha": "^6.2.2",
     "mocha-junit-reporter": "^1.23.1",
+    "solc": "^0.6.8",
     "truffle-flattener": "^1.4.4",
     "truffle-plugin-verify": "^0.3.11"
   },
