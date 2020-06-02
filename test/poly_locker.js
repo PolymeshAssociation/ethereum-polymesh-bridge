@@ -346,13 +346,12 @@ contract("PolyLocker", async(accounts) => {
             const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
             await POLYTOKEN.getTokens(WEB3.utils.toWei("4000"), ACCOUNT3);
             let account3_balance = await POLYTOKEN.balanceOf.call(ACCOUNT3);
-            console.log(`Balance of the Account 3 : ${account3_balance}`);
             await POLYTOKEN.approve(I_POLYLOCKER.address, account3_balance, { from: ACCOUNT3 });
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 50; i++) {
                 await I_POLYLOCKER.limitLock(meshAddress, WEB3.utils.toWei("1"), {from: ACCOUNT3});
             }
 
-            console.log(`No of events emitted by the contract until now : ${await I_POLYLOCKER.noOfeventsEmitted.call()}`);
+            let eventsEmittedInOldProxy = await I_POLYLOCKER.noOfeventsEmitted.call();
 
             // Set of new contracts deployed
             let PolyLockerNew = await PolyLocker.new();
@@ -361,7 +360,6 @@ contract("PolyLocker", async(accounts) => {
 
             // Propose upgrade on the new set of the Proxy
             let encodedCallData = encodeProxyCall(["address"], [I_POLYLOCKER.address]);
-            console.log(`Print the encoded callData : ${encodedCallData}`);
             let POLYLOCKER_NEW = await PolyLocker.new();
             await PolyLockerProxyNew.proposeUpgrade("1.2.0", POLYLOCKER_NEW.address, encodedCallData, {from: OWNER});
 
@@ -380,21 +378,16 @@ contract("PolyLocker", async(accounts) => {
                 "Fail in executing the function of implementation contract" // custom error string get returned
             );
 
-            console.log("Freeze test passed");
 
             let I_POLYLOCKER_NEW = await PolyLocker.at(PolyLockerProxyNew.address);
             // freeze the contract
             await I_POLYLOCKER_NEW.freezeLocking({from: OWNER});
-
-            console.log(`Freeze status of the Proxy : ${await I_POLYLOCKER_NEW.frozen.call()}`);
-
-            console.log(`Initialized status of the Proxy : ${await I_POLYLOCKER_NEW.initialized.call()}`);
-
+            assert.isTrue(await I_POLYLOCKER_NEW.frozen.call());
+            assert.isFalse(await I_POLYLOCKER_NEW.initialized.call());
             // Should upgrade easily 
             await PolyLockerProxyNew.upgradeToAndCall({from: OWNER});
-
-            // Check the events Id
-            console.log(`No of events emitted after the Proxy change: ${await I_POLYLOCKER.noOfeventsEmitted.call()}`);
+            assert.isTrue(await I_POLYLOCKER_NEW.initialized.call());
+            assert.equal(eventsEmittedInOldProxy.toString(), (await I_POLYLOCKER.noOfeventsEmitted.call()).toString());
         });
     })
 

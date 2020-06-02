@@ -26,8 +26,12 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     bytes32 private constant DATA_LENGTH_SLOT = 0xf54f318cf8e75c646a6bd1a15bc91e74327f81e4a3fcc81897561c91481babdb;
 
     // data that need to be used to initialize the contract
-    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.value.data"));
-    bytes32 private constant DATA_VALUE_SLOT = 0x9f5abb88b917fbc206f89a373f6d103515d22d9ae69d6bf5ce47bf9213710b94;
+    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.value.data1"));
+    bytes32 private constant DATA_VALUE_SLOT_1 = 0xc3f608ea5cf81906a3d0c2359dc66f8d621833f652a235c2e58450344299723c;
+
+    // data that need to be used to initialize the contract
+    // calculated using bytes32(keccak256("polyLocker.proxy.bytes.value.data2"));
+    bytes32 private constant DATA_VALUE_SLOT_2 = 0x4832d25f02a4f60c14be88c0a2205268a0d10b5fff3c92b53a9b96441e841369;
     
     // data that need to be used to initialize the contract
     // calculated using bytes32(keccak256("polyLocker.proxy.uint256.proposedUpgradeAt"));
@@ -206,12 +210,14 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     */
     function _data() internal view returns(bytes memory data) {
         bytes32 slot1 = DATA_LENGTH_SLOT;
-        bytes32 slot2 = DATA_VALUE_SLOT;
+        bytes32 slot2 = DATA_VALUE_SLOT_1;
+        bytes32 slot3 = DATA_VALUE_SLOT_2;
         assembly {
             data := mload(0x40)
             mstore(data, sload(slot1))
             mstore(add(data, 0x20), sload(slot2))
-            mstore(0x40, add(data, 0x40))
+            mstore(add(add(data, 0x20), 0x20), sload(slot3))
+            mstore(0x40, add(data, 0x60))
         }
     }
 
@@ -220,10 +226,12 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     */
     function _setData(bytes memory _newData) internal {
         bytes32 slot1 = DATA_LENGTH_SLOT;
-        bytes32 slot2 = DATA_VALUE_SLOT;
+        bytes32 slot2 = DATA_VALUE_SLOT_1;
+        bytes32 slot3 = DATA_VALUE_SLOT_2;
         assembly {
-            sstore(slot1, mload(_newData)) // length
-            sstore(slot2, mload(add(_newData, 0x20))) // value of the string
+            sstore(slot1, mload(_newData))
+            sstore(slot2, mload(add(_newData, 0x20)))
+            sstore(slot3, mload(add(add(_newData, 0x20), 0x20)))
         }
     }
 }
