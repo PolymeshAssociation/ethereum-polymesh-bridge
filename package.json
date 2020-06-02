@@ -32,6 +32,7 @@
   "scripts": {
     "test": "scripts/test.sh 2> /dev/null",
     "compile": "truffle compile --optimize-runs 200",
+    "version": "truffle version",
     "coverage": "scripts/coverage.sh",
     "ganache-cli": "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 -p 9000 --gasLimit 9000000",
     "migrate:local": "truffle migrate --network=development",
