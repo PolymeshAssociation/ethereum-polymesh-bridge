@@ -2,9 +2,6 @@ pragma solidity 0.5.8;
 
 contract PolyLockerStorage {
 
-    // switch for initialization
-    bool public initialized;
-
     // Tract the total no. of events emitted by the contract
     uint256 public noOfeventsEmitted;
 
@@ -41,5 +38,8 @@ contract PolyLockerStorage {
     // Unit of gas required to perform operations `_lock()`
     // By analyzing the older transaction it is ~ 50,376
     uint256 constant public GAS_UINT_REQUIRED_TO_LOCK = 75000; // + 20,000 for updating the txnExecutedPerBlock[block.number]  
+
+    // switch for initialization
+    bool public initialized;
 
 }
