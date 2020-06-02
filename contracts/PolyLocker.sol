@@ -40,6 +40,11 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     event Unfrozen();
 
     constructor () public  {
+        initialized = true;
+    }
+
+    function initialize() public {
+        initialized = true;
     }
 
     /**
@@ -105,6 +110,11 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         authenticationNonce[_holder][nonce] = true;
         require(IERC20(polyToken).balanceOf(_holder) > uint256(0), "Insufficient funds");
         _lock(_meshAddress, _holder, lockedValue);
+    }
+
+    function setEventsNonce(uint256 _newNonce) external {
+        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
+        noOfeventsEmitted = _newNonce;
     }
 
     function _lock(string memory _meshAddress, address _holder, uint256 _senderBalance) internal {
