@@ -30,6 +30,7 @@
   },
   "scripts": {
     "test": "scripts/test.sh 2> /dev/null",
+    "version": "truffle version",
     "compile": "truffle compile --optimize-runs 200",
     "coverage": "scripts/coverage.sh",
     "ganache-cli": "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 -p 9000 --gasLimit 9000000",

@@ -2,6 +2,9 @@ pragma solidity 0.5.8;
 
 contract PolyLockerStorage {
 
+    // Bool to switch on or off the initialization
+    bool public initialized;
+
     // Tract the total no. of events emitted by the contract
     uint256 public noOfeventsEmitted;
 
