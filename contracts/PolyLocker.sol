@@ -43,7 +43,10 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         initialized = true;
     }
 
-    function initialize() public {
+    function initialize(uint256 _blockDepth, uint256 _maxTxnAllowed) public {
+        require(!initialized, "Already initialized");
+        blockDepth = _blockDepth;
+        maxTxnAllowed = _maxTxnAllowed;
         initialized = true;
     }
 
