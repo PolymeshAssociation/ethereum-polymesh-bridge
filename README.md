@@ -65,3 +65,11 @@ upgraded PolyLocker (Logic address) - [0xa11ded28bfa305e7c877d0310df436e1f841ef7
 |PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
 
 upgraded PolyLocker (Logic address) - [0x09588b302B3526Aea8E8600ee52373B1b2eE36B6](https://kovan.etherscan.io/address/0x09588b302B3526Aea8E8600ee52373B1b2eE36B6)
+
+### 1.1.0
+| Contracts | Address |
+|------------|--------|
+|PolyLockerAddress (logic): | [0xDb99495e80f2a9dF8b6d296b5507214e668603Ce](https://kovan.etherscan.io/address/0xDb99495e80f2a9dF8b6d296b5507214e668603Ce)|
+|PolyLockerProxyAddress: | [0xC0E0845731af3F081d4947aAe5EB4256536D679B](https://kovan.etherscan.io/address/0xC0E0845731af3F081d4947aAe5EB4256536D679B) |
+|PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
+
