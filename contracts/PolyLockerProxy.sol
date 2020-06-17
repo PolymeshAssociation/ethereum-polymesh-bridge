@@ -6,16 +6,14 @@ import "./PolyLockerStorage.sol";
 /**
  * @title PolyLockerProxy
  */
-contract PolyLockerProxy is PolyLockerStorage, OwnedUpgradeabilityProxy {
+contract PolyLockerProxy is OwnedUpgradeabilityProxy, PolyLockerStorage {
 
     /**
     * @notice Constructor
-    * @param _version version
     * @param _implementation Address of the Polylocker contract
     * @param _polyToken Address of the Poly token
     */
     constructor (
-        string memory _version,
         address _implementation,
         address _polyToken
     )
@@ -28,10 +26,7 @@ contract PolyLockerProxy is PolyLockerStorage, OwnedUpgradeabilityProxy {
         // For deployment on Ethereum mainnet we will prefer hardcoded PolyToken
         require(_polyToken != address(0), "Invalid address");
         polyToken = _polyToken;
-        __proposeUpgradeAt = now;
-        __proposedVersion = _version;
-        __proposedImplementation = _implementation;
-        _upgradeTo(_version, _implementation);
+        _upgradeTo(_implementation);
     }
 
 }

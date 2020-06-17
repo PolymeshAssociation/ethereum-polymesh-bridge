@@ -8,13 +8,7 @@ import "./ProxyOwner.sol";
  * @dev This contract combines an upgradeability proxy with basic authorization control functionalities
  */
 contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
-    string internal __proposedVersion;
-    address internal __proposedImplementation;
-    bytes internal __data;
-    uint256 internal __proposeUpgradeAt;
-
-    uint256 constant internal COLDPERIOD = 24 hours;
-
+    
     /**
     * @dev Event to show ownership has been transferred
     * @param _previousOwner representing the address of the previous owner
@@ -41,42 +35,11 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     }
 
     /**
-    * @dev Tells the address of the owner
-    * @return the address of the owner
-    */
-    function _upgradeabilityOwner() internal view returns(address) {
-        return __upgradeabilityOwner;
-    }
-
-    /**
-    * @dev Sets the address of the owner
-    */
-    function _setUpgradeabilityOwner(address _newUpgradeabilityOwner) internal {
-        require(_newUpgradeabilityOwner != address(0), "Address should not be 0x");
-        __upgradeabilityOwner = _newUpgradeabilityOwner;
-    }
-
-    /**
-    * @notice Internal function to provide the address of the implementation contract
-    */
-    function _implementation() internal view returns(address) {
-        return __implementation;
-    }
-
-    /**
     * @dev Tells the address of the proxy owner
     * @return the address of the proxy owner
     */
     function proxyOwner() external ifOwner returns(address) {
         return _upgradeabilityOwner();
-    }
-
-    /**
-    * @dev Tells the version name of the current implementation
-    * @return string representing the name of the current version
-    */
-    function version() external ifOwner returns(string memory) {
-        return __version;
     }
 
     /**
@@ -98,43 +61,28 @@ contract OwnedUpgradeabilityProxy is ProxyOwner, UpgradeabilityProxy {
     }
 
     /**
-    * @dev Allows the upgradeability owner to upgrade the current version of the proxy and call the new implementation
-    * to initialize whatever is needed through a low level call.
-    * @param _newVersion representing the version name of the new implementation to be set.
-    * @param _newImplementation representing the address of the new implementation to be set.
-    * @param _data represents the msg.data to bet sent in the low level call. This parameter may include the function
-    * signature of the implementation to be called with the needed payload
-    */
-    function proposeUpgrade(string calldata _newVersion, address _newImplementation, bytes calldata _data) external ifOwner {
-        __proposeUpgradeAt = now;
-        __proposedVersion = _newVersion;
-        __proposedImplementation = _newImplementation;
-        __data = _data;
-    }
-
-    /**
     * @dev Allows the upgradeability owner to upgrade the current version of the proxy.
+    * @param _newImplementation Address of the logic contract
     */
-    function upgradeTo() external ifOwner {
-        require(now > (__proposeUpgradeAt + COLDPERIOD), "Proposal is in unmatured state");
-        _upgradeTo(__proposedVersion, __proposedImplementation);
+    function upgradeTo(address _newImplementation) external ifOwner {
+        _upgradeTo(_newImplementation);
     }
 
     /**
     * @dev Allows the upgradeability owner to upgrade the current version of the proxy and call the new implementation
     * to initialize whatever is needed through a low level call.
+    * @param _newImplementation Address of the logic contract
+    * @param _data extra data needed durin upgrade
     */
-    function upgradeToAndCall() external payable ifOwner {
-        require(now > (__proposeUpgradeAt + COLDPERIOD), "Proposal is in unmatured state");
-        _upgradeToAndCall(__proposedVersion, __proposedImplementation, __data);
+    function upgradeToAndCall(address _newImplementation, bytes calldata _data) external payable ifOwner {
+        _upgradeToAndCall(_newImplementation, _data);
     }
 
-    function _upgradeToAndCall(string memory _newVersion, address _newImplementation, bytes memory _data) internal {
-        _upgradeTo(_newVersion, _newImplementation);
+    function _upgradeToAndCall(address _newImplementation, bytes memory _data) internal {
+        _upgradeTo(_newImplementation);
         bool success;
         /*solium-disable-next-line security/no-call-value*/
         (success, ) = address(this).call.value(msg.value)(_data);
         require(success, "Fail in executing the function of implementation contract");
     }
-
 }

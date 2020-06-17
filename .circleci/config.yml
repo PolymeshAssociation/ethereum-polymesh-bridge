@@ -2,22 +2,22 @@ version: 2
 jobs:
   build:
     docker:
-      - image: maxsam4/solidity-kit
+      - image: bakii0499/solidity:latest
     steps:
       - checkout
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run: yarn install
       - run: node --version
-      - run: truffle version
-      - run: truffle compile
+      - run: npm run version
+      - run: npm run compile
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - node_modules
   test:
     docker:
-      - image: maxsam4/solidity-kit
+      - image: bakii0499/solidity:latest
     parallelism: 2
     steps:
       - checkout
@@ -25,7 +25,7 @@ jobs:
           key: dependency-cache-{{ checksum "package.json" }}
       - run: yarn install
       - run: node --version
-      - run: truffle version
+      - run: npm run version
       - run: npm run test
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
@@ -37,14 +37,14 @@ jobs:
           path: ./test-results/mocha/results.xml
   coverage:
     docker:
-      - image: maxsam4/solidity-kit
+      - image: bakii0499/solidity:latest
     steps:
       - checkout
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run: yarn install
       - run: node --version
-      - run: truffle version
+      - run: npm run version
       - run:
           command: npm run coverage
           no_output_timeout: 1h

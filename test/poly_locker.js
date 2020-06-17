@@ -40,7 +40,7 @@ contract("PolyLocker", async(accounts) => {
 
         POLYTOKEN = await PolyToken.new({from: OWNER});
         POLYLOCKER = await PolyLocker.new({from: OWNER});
-        POLYLOCKERPROXY = await PolyLockerProxy.new("1.0.0", POLYLOCKER.address, POLYTOKEN.address, {from: OWNER});
+        POLYLOCKERPROXY = await PolyLockerProxy.new(POLYLOCKER.address, POLYTOKEN.address, {from: OWNER});
         WEB3 = new Web3(web3.currentProvider);
 
         console.log(`
@@ -57,14 +57,14 @@ contract("PolyLocker", async(accounts) => {
 
         it("Should fail to deploy the PolyLockerProxy contract -- Implementation address should not be 0x", async() => {
             await catchRevert(
-                PolyLockerProxy.new("1.0.0", "0x0000000000000000000000000000000000000000", POLYTOKEN.address, {from: OWNER}),
+                PolyLockerProxy.new("0x0000000000000000000000000000000000000000", POLYTOKEN.address, {from: OWNER}),
                 "Implementation address should not be 0x"
             );
         });
 
         it("Should fail to deploy the PolyLockerProxy contract -- Invalid address", async() => {
             await catchRevert(
-                PolyLockerProxy.new("1.0.0", POLYLOCKER.address, "0x0000000000000000000000000000000000000000", {from: OWNER}),
+                PolyLockerProxy.new(POLYLOCKER.address, "0x0000000000000000000000000000000000000000", {from: OWNER}),
                 "Invalid address"
             );
         });
@@ -304,28 +304,12 @@ contract("PolyLocker", async(accounts) => {
 
     describe("Update the logic contract of the locker contract", async() => {
 
-        it("Should propose the contract", async() => {
-            MOCKPOLYLOCKER = await MockPolyLocker.new();
-            await POLYLOCKERPROXY.proposeUpgrade("1.1.0", MOCKPOLYLOCKER.address, "0x0", {from: OWNER});
-        });
-
-        it("Should fail to upgrade -- Cold period not pass", async() => {
-            await catchRevert(
-                POLYLOCKERPROXY.upgradeTo({from: OWNER}),
-                "Proposal is in unmatured state"
-            );
-        });
-
         it("Should successfully upgrade", async() => {
-            await increaseTime(86470); // 24 hours increase + 70 seconds buffer
-            await POLYLOCKERPROXY.upgradeTo({from: OWNER});
+            MOCKPOLYLOCKER = await MockPolyLocker.new();
+            let tx = await POLYLOCKERPROXY.upgradeTo(MOCKPOLYLOCKER.address, {from: OWNER});
             assert.equal(
                 await POLYLOCKERPROXY.implementation.call({from: OWNER}),
                 MOCKPOLYLOCKER.address
-            );
-            assert.equal(
-                await POLYLOCKERPROXY.version.call({from: OWNER}),
-                "1.1.0"
             );
         });
     });

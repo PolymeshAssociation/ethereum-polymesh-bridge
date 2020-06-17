@@ -20,7 +20,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 import "./PolyLockerStorage.sol";
-import "./proxies//ProxyOwner.sol";
+import "./proxies/ProxyOwner.sol";
 
 /**
  * @title Contract used to lock POLY corresponds to locked amount user can claim same
@@ -40,13 +40,18 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     event Unfrozen();
 
     constructor () public  {
+        initialized = true;
+    }
+
+    function initialize() public {
+        initialized = true;
     }
 
     /**
      * @notice Used for freezing locking of POLY token
      */
     function freezeLocking() external {
-        require(msg.sender == __upgradeabilityOwner, "Unauthorized");
+        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
         require(!frozen, "Already frozen");
         frozen = true;
         emit Frozen();
@@ -56,7 +61,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      * @notice Used for unfreezing locking of POLY token
      */
     function unfreezeLocking() external {
-        require(msg.sender == __upgradeabilityOwner, "Unauthorized");
+        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
         require(frozen, "Already unfrozen");
         frozen = false;
         emit Unfrozen();
@@ -76,7 +81,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      * @param _lockedValue Amount of tokens need to locked
      */
     function limitLock(string calldata _meshAddress, uint256 _lockedValue) external {
-        require(IERC20(polyToken).balanceOf(msg.sender) > uint256(0), "Insufficient funds");
+        require(IERC20(polyToken).balanceOf(msg.sender) >= _lockedValue, "Insufficient funds");
         _lock(_meshAddress, msg.sender, _lockedValue);
     }
 
@@ -107,7 +112,13 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         _lock(_meshAddress, _holder, lockedValue);
     }
 
+    function setEventsNonce(uint256 _newNonce) external {
+        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
+        noOfeventsEmitted = _newNonce;
+    }
+
     function _lock(string memory _meshAddress, address _holder, uint256 _senderBalance) internal {
+        _applyGasThrottling(GAS_UINT_REQUIRED_TO_LOCK);
         // Make sure locking is not frozen
         require(!frozen, "Locking frozen");
         // Validate the MESH address
@@ -130,5 +141,36 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
         noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
         emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
+    }
+
+    function _applyGasThrottling(uint256 _gasConsumptionNeeded) internal {
+        uint256 txnAlreadyExecuted;
+        uint256 penalisedGasAmount = 0;
+        uint256 iterationFrom = block.number - 1;
+        uint256 iterationTill = iterationFrom - BLOCK_DEPTH;
+        // calculate txns executed in Block depth
+        for (uint256 i = iterationFrom; i > iterationTill; i--) {
+            txnAlreadyExecuted += txnExecutedPerBlock[i];
+        }
+        // check whether current transaction will bear peanlty or not.
+        if (txnAlreadyExecuted > MAX_TXN_ALLOWED) {
+            penalisedGasAmount = (txnAlreadyExecuted - MAX_TXN_ALLOWED) * GAS_UNIT_PENALTY;
+            penalisedGasAmount = penalisedGasAmount > MAX_GAS_LIMIT ?  MAX_GAS_LIMIT : penalisedGasAmount;
+        }
+        require(gasleft() >= penalisedGasAmount + _gasConsumptionNeeded, "Gas to low");
+        // consumed Extra gas
+        if (penalisedGasAmount > 0) 
+            consumeGasPenalty(gasleft() - penalisedGasAmount);
+        // Update the txn count
+        // consume 20,000 of gas unit if `txnExecutedPerBlock[block.number]` is 0
+        // otherwise it consume 5000 gas unit
+        // refernce - https://eips.ethereum.org/EIPS/eip-1087
+        txnExecutedPerBlock[block.number] += 1;
+    }
+    
+    function consumeGasPenalty(uint256 _till) internal {
+        while(gasleft() > _till) {
+            // Loop till the gas left will equal to or less `_till`
+        }
     }
 }
