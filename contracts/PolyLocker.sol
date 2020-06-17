@@ -43,7 +43,10 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         initialized = true;
     }
 
-    function initialize() public {
+    function initialize(uint256 _blockDepth, uint256 _maxTxnAllowed) public {
+        require(!initialized, "Already initialized");
+        blockDepth = _blockDepth;
+        maxTxnAllowed = _maxTxnAllowed;
         initialized = true;
     }
 
@@ -112,9 +115,24 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         _lock(_meshAddress, _holder, lockedValue);
     }
 
+    /**
+     * @notice used to set the nonce
+     * @param _newNonce New nonce to set with the contract
+     */
     function setEventsNonce(uint256 _newNonce) external {
         require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
         noOfeventsEmitted = _newNonce;
+    }
+
+    /**
+     * @notice used to set the block depth and maximum txn allowed
+     * @param _newBlockDepth New Block depth
+     * @param _newMaximumTxCount New txn count
+     */
+    function setAdaptiveGasVariants(uint256 _newBlockDepth, uint256 _newMaximumTxCount) external {
+        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
+        blockDepth = _newBlockDepth;
+        maxTxnAllowed = _newMaximumTxCount;
     }
 
     function _lock(string memory _meshAddress, address _holder, uint256 _senderBalance) internal {
@@ -147,14 +165,14 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         uint256 txnAlreadyExecuted;
         uint256 penalisedGasAmount = 0;
         uint256 iterationFrom = block.number - 1;
-        uint256 iterationTill = iterationFrom - BLOCK_DEPTH;
+        uint256 iterationTill = iterationFrom - blockDepth;
         // calculate txns executed in Block depth
         for (uint256 i = iterationFrom; i > iterationTill; i--) {
             txnAlreadyExecuted += txnExecutedPerBlock[i];
         }
         // check whether current transaction will bear peanlty or not.
-        if (txnAlreadyExecuted > MAX_TXN_ALLOWED) {
-            penalisedGasAmount = (txnAlreadyExecuted - MAX_TXN_ALLOWED) * GAS_UNIT_PENALTY;
+        if (txnAlreadyExecuted > maxTxnAllowed) {
+            penalisedGasAmount = (txnAlreadyExecuted - maxTxnAllowed) * GAS_UNIT_PENALTY;
             penalisedGasAmount = penalisedGasAmount > MAX_GAS_LIMIT ?  MAX_GAS_LIMIT : penalisedGasAmount;
         }
         require(gasleft() >= penalisedGasAmount + _gasConsumptionNeeded, "Gas to low");
