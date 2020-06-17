@@ -53,8 +53,10 @@ upgraded PolyLocker (Logic address) - [0xa11ded28bfa305e7c877d0310df436e1f841ef7
 | Contracts | Address |
 |------------|--------|
 |PolyLockerAddress (logic): | [0x528999Ae62d515e2F0CeE0cc9E6681e29BC59f36](https://kovan.etherscan.io/address/0x528999Ae62d515e2F0CeE0cc9E6681e29BC59f36)|
-|PolyLockerProxyAddress: | [0x96EC5Aff6d6c4a64Ef3Cf092b73aF98f3224daCc](https://kovan.etherscan.io/address/0x96EC5Aff6d6c4a64Ef3Cf092b73aF98f3224daCc) |
+|PolyLockerProxyAddress: | [0x9791be69F613D372E09EbA611d25157A5512c5c8](https://kovan.etherscan.io/address/0x9791be69F613D372E09EbA611d25157A5512c5c8) |
 |PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
+
+upgraded PolyLocker (Logic address) - [0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e](https://kovan.etherscan.io/address/0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e)
 
 ## Kovan (Ethereum) <-> Aldebaran (Polymesh testnet)
 
@@ -73,3 +75,4 @@ upgraded PolyLocker (Logic address) - [0x09588b302B3526Aea8E8600ee52373B1b2eE36B
 |PolyLockerProxyAddress: | [0xC0E0845731af3F081d4947aAe5EB4256536D679B](https://kovan.etherscan.io/address/0xC0E0845731af3F081d4947aAe5EB4256536D679B) |
 |PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
 
+upgraded PolyLocker (Logic address) - [0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e](https://kovan.etherscan.io/address/0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e)
