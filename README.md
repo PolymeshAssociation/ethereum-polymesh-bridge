@@ -76,3 +76,10 @@ upgraded PolyLocker (Logic address) - [0x09588b302B3526Aea8E8600ee52373B1b2eE36B
 |PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
 
 upgraded PolyLocker (Logic address) - [0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e](https://kovan.etherscan.io/address/0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e)
+
+## Kovan (For tooling chain PMF)
+| Contracts | Address |
+|------------|--------|
+|PolyLockerAddress (logic): | [0x75Dc41b0d69d182fc3fFc7716d35a1845121618d](https://kovan.etherscan.io/address/0x75Dc41b0d69d182fc3fFc7716d35a1845121618d)|
+|PolyLockerProxyAddress: | [0xd44A07f1bf0d0DFC3A553E6657a87DB93409Eec6](https://kovan.etherscan.io/address/0xd44A07f1bf0d0DFC3A553E6657a87DB93409Eec6) |
+|PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
