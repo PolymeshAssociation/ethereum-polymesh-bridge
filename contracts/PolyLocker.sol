@@ -33,22 +33,11 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     using ECDSA for bytes32;
 
     // Emit an event when the poly gets lock
-    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance, uint256 _polyTokenBalance);
+    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance);
     // Emitted when locking is frozen
     event Frozen();
     // Emitted when locking is unfrozen
     event Unfrozen();
-
-    constructor () public  {
-        initialized = true;
-    }
-
-    function initialize(uint256 _blockDepth, uint256 _maxTxnAllowed) public {
-        require(!initialized, "Already initialized");
-        blockDepth = _blockDepth;
-        maxTxnAllowed = _maxTxnAllowed;
-        initialized = true;
-    }
 
     /**
      * @notice Used for freezing locking of POLY token
@@ -84,7 +73,6 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      * @param _lockedValue Amount of tokens need to locked
      */
     function limitLock(string calldata _meshAddress, uint256 _lockedValue) external {
-        require(IERC20(polyToken).balanceOf(msg.sender) >= _lockedValue, "Insufficient funds");
         _lock(_meshAddress, msg.sender, _lockedValue);
     }
 
@@ -124,71 +112,23 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         noOfeventsEmitted = _newNonce;
     }
 
-    /**
-     * @notice used to set the block depth and maximum txn allowed
-     * @param _newBlockDepth New Block depth
-     * @param _newMaximumTxCount New txn count
-     */
-    function setAdaptiveGasVariants(uint256 _newBlockDepth, uint256 _newMaximumTxCount) external {
-        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
-        blockDepth = _newBlockDepth;
-        maxTxnAllowed = _newMaximumTxCount;
-    }
-
     function _lock(string memory _meshAddress, address _holder, uint256 _senderBalance) internal {
-        _applyGasThrottling(GAS_UINT_REQUIRED_TO_LOCK);
         // Make sure locking is not frozen
         require(!frozen, "Locking frozen");
         // Validate the MESH address
         require(bytes(_meshAddress).length == VALID_ADDRESS_LENGTH, "Invalid length of mesh address");
-        // Check the valid granularity, It should be 10^6 if not then transfer only 10^6 granularity funds
-        // rest will reamin as dust in the sender account
-        if (_senderBalance % TRUNCATE_SCALE != 0) {
-            _senderBalance = _senderBalance.div(TRUNCATE_SCALE);
-            _senderBalance = _senderBalance.mul(TRUNCATE_SCALE);
-        }
 
         // Make sure balance is divisible by 10e18
-        require(_senderBalance.div(10 ** 18) >= uint256(1), "Minimum amount to transfer to Polymesh is 1 POLYX");
+        require(_senderBalance >= E18, "Insufficient amount");
 
         // Polymesh balances have 6 decimal places.
         // 1 POLY on Ethereum has 18 decimal places. 1 POLY on Polymesh has 6 decimal places.
-        uint256 polymeshBalance = _senderBalance.div(TRUNCATE_SCALE);
+        uint256 polymeshBalance = _senderBalance / TRUNCATE_SCALE;
 
-        // Transfer funds to the contract
-        require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
-        noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
-        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
-    }
-
-    function _applyGasThrottling(uint256 _gasConsumptionNeeded) internal {
-        uint256 txnAlreadyExecuted;
-        uint256 penalisedGasAmount = 0;
-        uint256 iterationFrom = block.number - 1;
-        uint256 iterationTill = iterationFrom - blockDepth;
-        // calculate txns executed in Block depth
-        for (uint256 i = iterationFrom; i > iterationTill; i--) {
-            txnAlreadyExecuted += txnExecutedPerBlock[i];
-        }
-        // check whether current transaction will bear peanlty or not.
-        if (txnAlreadyExecuted > maxTxnAllowed) {
-            penalisedGasAmount = (txnAlreadyExecuted - maxTxnAllowed) * GAS_UNIT_PENALTY;
-            penalisedGasAmount = penalisedGasAmount > MAX_GAS_LIMIT ?  MAX_GAS_LIMIT : penalisedGasAmount;
-        }
-        require(gasleft() >= penalisedGasAmount + _gasConsumptionNeeded, "Gas to low");
-        // consumed Extra gas
-        if (penalisedGasAmount > 0) 
-            consumeGasPenalty(gasleft() - penalisedGasAmount);
-        // Update the txn count
-        // consume 20,000 of gas unit if `txnExecutedPerBlock[block.number]` is 0
-        // otherwise it consume 5000 gas unit
-        // refernce - https://eips.ethereum.org/EIPS/eip-1087
-        txnExecutedPerBlock[block.number] += 1;
-    }
-    
-    function consumeGasPenalty(uint256 _till) internal {
-        while(gasleft() > _till) {
-            // Loop till the gas left will equal to or less `_till`
-        }
+        // Transfer funds to this contract
+        require(IERC20(polyToken).transferFrom(_holder, address(this), polymeshBalance * TRUNCATE_SCALE), "Insufficient allowance");
+        uint256 cachedNoOfeventsEmitted = noOfeventsEmitted + 1; // Caching number of events in memory
+        noOfeventsEmitted =  cachedNoOfeventsEmitted; // Increment the event counter
+        emit PolyLocked(cachedNoOfeventsEmitted, _holder, _meshAddress, polymeshBalance);
     }
 }

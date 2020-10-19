@@ -135,7 +135,7 @@ contract("PolyLocker", async(accounts) => {
             const meshAddress = "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y";
             await catchRevert(
                 I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT5}),
-                "Minimum amount to transfer to Polymesh is 1 POLYX -- Reason given: Minimum amount to transfer to Polymesh is 1 POLYX."
+                "Insufficient amount"
             );
         });
 
@@ -161,7 +161,7 @@ contract("PolyLocker", async(accounts) => {
             await POLYTOKEN.approve(I_POLYLOCKER.address, WEB3.utils.toWei("500"), { from: ACCOUNT5 });
             await catchRevert(
                 I_POLYLOCKER.limitLock(meshAddress, WEB3.utils.toWei("500"), {from: ACCOUNT5}),
-                "Insufficient funds"
+                "Insufficient tokens transferable"
             );
         });
 
@@ -195,7 +195,7 @@ contract("PolyLocker", async(accounts) => {
             const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
             await catchRevert(
                 I_POLYLOCKER.lock(meshAddress, {from: ACCOUNT2}),
-                "Minimum amount to transfer to Polymesh is 1 POLYX"
+                "Insufficient amount"
             );
         });
 
@@ -390,7 +390,6 @@ contract("PolyLocker", async(accounts) => {
 
             assert.equal(tx.logs[0].args._holder, ACCOUNT4);
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
-            assert.equal(WEB3.utils.fromWei(tx.logs[0].args._polyTokenBalance.toString()), 500);
             assert.equal((tx.logs[0].args._polymeshBalance).toString(), 500000000);
         });
     });

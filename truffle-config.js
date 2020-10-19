@@ -16,8 +16,6 @@ module.exports = {
       host: 'localhost',
       port: 9000,
       network_id: '*', // Match any network id
-      gas: 4712388,
-      gasPrice: 0,
     },
     mainnet: {
       provider: () => {
@@ -78,7 +76,8 @@ module.exports = {
     }
   },
   mocha: {
-    enableTimeouts: false
+    enableTimeouts: false,
+    reporter: 'eth-gas-reporter',
   },
   plugins: [
     'truffle-plugin-verify'
