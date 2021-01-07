@@ -33,7 +33,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     using ECDSA for bytes32;
 
     // Emit an event when the poly gets lock
-    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _value);
+    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance, uint256 _polyTokenBalance);
     // Emitted when locking is frozen
     event Frozen();
     // Emitted when locking is unfrozen
@@ -113,17 +113,16 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         // Validate the MESH address
         require(bytes(_meshAddress).length == VALID_ADDRESS_LENGTH, "Invalid length of mesh address");
         // Check the valid granularity, It should be 10^6 if not then transfer only 10^6 granularity funds
-        // rest will reamin as dust in the sender account
-        if (_senderBalance % VALID_GRANULARITY != 0) {
-            _senderBalance = _senderBalance.div(VALID_GRANULARITY);
-            _senderBalance = _senderBalance.mul(VALID_GRANULARITY);
-        }
+        // rest will remain as dust in the sender account
+        let polymeshBalance = _senderBalance.div(GRANULARITY_DIFFERENCE);
+        _senderBalance = polymeshBalance.mul(GRANULARITY_DIFFERENCE);
+
         // Check whether the senderBalance is greater than 0 or not
         require(_senderBalance > uint256(0), "Invalid locked amount");
         // Transfer funds to the contract
         require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
         noOfeventsEmitted = noOfeventsEmitted + 1;  // Increment the event counter
-        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, _senderBalance);
+        emit PolyLocked(noOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
     }
 
 }
