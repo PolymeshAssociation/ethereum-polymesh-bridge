@@ -33,7 +33,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     using ECDSA for bytes32;
 
     // Emit an event when the poly gets lock
-    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance);
+    event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance, uint256 _polyTokenBalance);
     // Emitted when locking is frozen
     event Frozen();
     // Emitted when locking is unfrozen
@@ -124,11 +124,12 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         // Polymesh balances have 6 decimal places.
         // 1 POLY on Ethereum has 18 decimal places. 1 POLY on Polymesh has 6 decimal places.
         uint256 polymeshBalance = _senderBalance / TRUNCATE_SCALE;
+        _senderBalance = polymeshBalance * TRUNCATE_SCALE;
 
         // Transfer funds to this contract
-        require(IERC20(polyToken).transferFrom(_holder, address(this), polymeshBalance * TRUNCATE_SCALE), "Insufficient allowance");
+        require(IERC20(polyToken).transferFrom(_holder, address(this), _senderBalance), "Insufficient allowance");
         uint256 cachedNoOfeventsEmitted = noOfeventsEmitted + 1; // Caching number of events in memory
         noOfeventsEmitted =  cachedNoOfeventsEmitted; // Increment the event counter
-        emit PolyLocked(cachedNoOfeventsEmitted, _holder, _meshAddress, polymeshBalance);
+        emit PolyLocked(cachedNoOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _senderBalance);
     }
 }
