@@ -1,6 +1,4 @@
 import { catchRevert } from "./helpers/exceptions";
-import { getSignData } from "./helpers/signData";
-import { increaseTime } from "./helpers/time";
 
 const PolyLocker = artifacts.require("PolyLocker");
 const PolyLockerProxy = artifacts.require("PolyLockerProxy");
@@ -8,7 +6,6 @@ const PolyToken = artifacts.require("PolyTokenFaucet");
 const MockPolyLocker = artifacts.require("MockPolyLocker");
 
 const Web3 = require("web3");
-let BN = Web3.utils.BN;
 
 contract("PolyLocker", async(accounts) => {
 
@@ -212,94 +209,6 @@ contract("PolyLocker", async(accounts) => {
             assert.equal(tx.logs[0].args._meshAddress, meshAddress);
             assert.equal(tx.logs[0].args._polymeshBalance.toNumber(), 100456789);
         });
-    });
-
-    describe("Test the functionality of lockWithData", async() => {
-
-        it("Should fail to lock Poly using lockWithData -- Invalid address", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            let signer_balance = await POLYTOKEN.balanceOf.call(SIGNER);
-            await WEB3.eth.personal.importRawKey(SIGNERPRIVATEKEY, "");
-            await WEB3.eth.personal.unlockAccount(SIGNER, "", 6000);
-            await WEB3.eth.sendTransaction({ from: ACCOUNT5, to: SIGNER, value: WEB3.utils.toWei("5")});
-
-            await POLYTOKEN.approve(I_POLYLOCKER.address, signer_balance, { from: SIGNER });
-            let data = getSignData(I_POLYLOCKER.address, meshAddress, WEB3.utils.toWei("1000"), 1, SIGNERPRIVATEKEY);
-            await catchRevert(
-                I_POLYLOCKER.lockWithData(meshAddress, "0x0000000000000000000000000000000000000000", WEB3.utils.toWei("1000"), data, {from: ACCOUNT5}),
-                "Invalid address"
-            );
-        });
-
-        it("Should fail to lock Poly using lockWithData -- Invalid target address", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            let data = getSignData(ACCOUNT2, meshAddress, WEB3.utils.toWei("1000"), 1, SIGNERPRIVATEKEY);
-            await catchRevert(
-                I_POLYLOCKER.lockWithData(meshAddress, SIGNER, WEB3.utils.toWei("1000"), data, {from: ACCOUNT5}),
-                "Invalid target address"
-            );
-        });
-
-        it("Should fail to lock Poly using lockWithData -- Invalid amount of tokens", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            let data = getSignData(I_POLYLOCKER.address, meshAddress, WEB3.utils.toWei("500"), 1, SIGNERPRIVATEKEY);
-            await catchRevert(
-                I_POLYLOCKER.lockWithData(meshAddress, SIGNER, WEB3.utils.toWei("1000"), data, {from: ACCOUNT5}),
-                "Invalid amount of tokens"
-            );
-        });
-
-        it("Should fail to lock Poly using lockWithData -- Invalid mesh address", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            let data = getSignData(I_POLYLOCKER.address, "5FFArh9PRVqtGYRNZM8FxQALrgv185zoB91aXPszCLV9Jjr3", WEB3.utils.toWei("1000"), 1, SIGNERPRIVATEKEY);
-            await catchRevert(
-                I_POLYLOCKER.lockWithData(meshAddress, SIGNER, WEB3.utils.toWei("1000"), data, {from: ACCOUNT5}),
-                "Invalid mesh address"
-            );
-        });
-
-        it("Should successfully lock Poly tokens using lockWithData", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            let data = getSignData(I_POLYLOCKER.address, meshAddress, new BN(WEB3.utils.toWei("1000")), new BN(1), SIGNERPRIVATEKEY);
-            let tx = await I_POLYLOCKER.lockWithData(meshAddress, SIGNER, new BN(WEB3.utils.toWei("1000")), data, {from: ACCOUNT5});
-            contract_balance = parseFloat(WEB3.utils.fromWei((await POLYTOKEN.balanceOf.call(I_POLYLOCKER.address)).toString()));
-
-            assert.equal(WEB3.utils.fromWei((await POLYTOKEN.balanceOf.call(SIGNER)).toString()), 4000);
-            assert.equal(contract_balance, 5651.369699);
-            assert.equal(tx.logs[0].args._holder, SIGNER);
-            assert.equal(tx.logs[0].args._meshAddress, meshAddress);
-            assert.equal((tx.logs[0].args._polymeshBalance).toNumber(), 1000000000);
-        });
-
-        it("Should fail to lock Poly using lockWithData -- Already used signature", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            let data = getSignData(I_POLYLOCKER.address, meshAddress, WEB3.utils.toWei("1000"), new BN(1), SIGNERPRIVATEKEY);
-            await catchRevert(
-                I_POLYLOCKER.lockWithData(meshAddress, SIGNER, WEB3.utils.toWei("1000"), data, {from: ACCOUNT5}),
-                "Already used signature"
-            );
-        });
-
-        it("Should fail to lock Poly using lockWithData -- Incorrect Signer", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            let data = getSignData(I_POLYLOCKER.address, meshAddress, WEB3.utils.toWei("1000"), new BN(2), SIGNERPRIVATEKEY);
-            await catchRevert(
-                I_POLYLOCKER.lockWithData(meshAddress, ACCOUNT4, WEB3.utils.toWei("1000"), data, {from: ACCOUNT5}),
-                "Incorrect Signer"
-            );
-        });
-
-        it("Should fail to lock Poly using lockWithData -- Insufficient funds", async() => {
-            const meshAddress = "5FFArh9PRVqtGYRNZM8FxQALrgv185zoA91aXPszCLV9Jjr3";
-            // generate new account
-            let signer = WEB3.eth.accounts.create();
-            let data = getSignData(I_POLYLOCKER.address, meshAddress, WEB3.utils.toWei("1000"), new BN(2), signer.privateKey);
-            await catchRevert(
-                I_POLYLOCKER.lockWithData(meshAddress, signer.address, WEB3.utils.toWei("1000"), data, {from: ACCOUNT5}),
-                "Insufficient funds"
-            );
-        });
-
     });
 
     describe("Update the logic contract of the locker contract", async() => {

@@ -23,7 +23,6 @@ contract PolyLockerProxy is OwnedUpgradeabilityProxy, PolyLockerStorage {
             _implementation != address(0),
             "Implementation address should not be 0x"
         );
-        // For deployment on Ethereum mainnet we will prefer hardcoded PolyToken
         require(_polyToken != address(0), "Invalid address");
         polyToken = _polyToken;
         _upgradeTo(_implementation);
