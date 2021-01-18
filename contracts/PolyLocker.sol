@@ -28,7 +28,7 @@ contract PolyLocker is Ownable {
     uint256 public noOfeventsEmitted;
 
     // Address of the token that is locked by the contract. i.e. PolyToken contract address.
-    IERC20 public polyToken;
+    IERC20 public immutable polyToken;
 
     // Controls if locking Poly is frozen.
     bool public frozen;
