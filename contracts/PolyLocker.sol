@@ -1,4 +1,6 @@
-pragma solidity 0.5.8;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.7.6;
 
 // Requirements
 
@@ -13,15 +15,32 @@ pragma solidity 0.5.8;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./PolyLockerStorage.sol";
-import "./proxies/ProxyOwner.sol";
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
 /**
  * @title Contract used to lock POLY corresponds to locked amount user can claim same
  * amount of POLY on Polymesh blockchain
  */
-contract PolyLocker is PolyLockerStorage, ProxyOwner {
+contract PolyLocker is Ownable {
     using SafeMath for uint256;
+
+    // Tracks the total no. of events emitted by the contract.
+    uint256 public noOfeventsEmitted;
+
+    // Address of the token that is locked by the contract. i.e. PolyToken contract address.
+    IERC20 public polyToken;
+
+    // Controls if locking Poly is frozen.
+    bool public frozen;
+
+    // Granularity Polymesh blockchain in 10^6 but it's 10^18 on Ethereum.
+    // This is used to truncate 18 decimal places to 6.
+    uint256 constant public TRUNCATE_SCALE = 10 ** 12;
+
+    // Valid address length of Polymesh blockchain.
+    uint256 constant public VALID_ADDRESS_LENGTH = 48;
+
+    uint256 constant internal E18 = uint256(10) ** 18;
 
     // Emit an event when the poly gets lock
     event PolyLocked(uint256 indexed _id, address indexed _holder, string _meshAddress, uint256 _polymeshBalance, uint256 _polyTokenBalance);
@@ -30,9 +49,10 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
     // Emitted when locking is unfrozen
     event Unfrozen();
 
-    modifier onlyOwner() {
-        require(msg.sender == _upgradeabilityOwner(), "Unauthorized");
-        _;
+
+    constructor(address _polyToken) {
+        require(_polyToken != address(0), "Invalid address");
+        polyToken = IERC20(_polyToken);
     }
 
     /**
@@ -66,7 +86,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
      * @param _meshAddress Address that compatible the Polymesh blockchain
      */
     function lock(string calldata _meshAddress) external {
-        _lock(_meshAddress, msg.sender, IERC20(polyToken).balanceOf(msg.sender));
+        _lock(_meshAddress, msg.sender, polyToken.balanceOf(msg.sender));
     }
 
     /**
@@ -94,7 +114,7 @@ contract PolyLocker is PolyLockerStorage, ProxyOwner {
         _polyAmount = polymeshBalance * TRUNCATE_SCALE;
 
         // Transfer funds to this contract
-        require(IERC20(polyToken).transferFrom(_holder, address(this), _polyAmount), "Insufficient allowance");
+        require(polyToken.transferFrom(_holder, address(this), _polyAmount), "Insufficient allowance");
         uint256 cachedNoOfeventsEmitted = noOfeventsEmitted + 1; // Caching number of events in memory, saves 1 SLOAD
         noOfeventsEmitted = cachedNoOfeventsEmitted; // Increment the event counter in storage
         // The event does not need to contain both `polymeshBalance` and `_polyAmount` as one can be derived from other.
