@@ -7,7 +7,7 @@ let ver;
 if (process.env.POLYMATH_NATIVE_SOLC) {
   ver = "native";
 } else {
-  ver = "0.5.8";
+  ver = "0.7.6";
 }
 
 module.exports = {

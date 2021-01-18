@@ -1,4 +1,6 @@
-pragma solidity 0.5.8;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.7.6;
 
 // Requirements
 
@@ -13,7 +15,7 @@ pragma solidity 0.5.8;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
 /**
  * @title Contract used to lock POLY corresponds to locked amount user can claim same
@@ -26,7 +28,7 @@ contract PolyLocker is Ownable {
     uint256 public noOfeventsEmitted;
 
     // Address of the token that is locked by the contract. i.e. PolyToken contract address.
-    address public polyToken;
+    IERC20 public polyToken;
 
     // Controls if locking Poly is frozen.
     bool public frozen;
@@ -48,9 +50,9 @@ contract PolyLocker is Ownable {
     event Unfrozen();
 
 
-    constructor(address _polyToken) public {
+    constructor(address _polyToken) {
         require(_polyToken != address(0), "Invalid address");
-        polyToken = _polyToken;
+        polyToken = IERC20(_polyToken);
     }
 
     /**
@@ -84,7 +86,7 @@ contract PolyLocker is Ownable {
      * @param _meshAddress Address that compatible the Polymesh blockchain
      */
     function lock(string calldata _meshAddress) external {
-        _lock(_meshAddress, msg.sender, IERC20(polyToken).balanceOf(msg.sender));
+        _lock(_meshAddress, msg.sender, polyToken.balanceOf(msg.sender));
     }
 
     /**
@@ -112,7 +114,7 @@ contract PolyLocker is Ownable {
         _polyAmount = polymeshBalance * TRUNCATE_SCALE;
 
         // Transfer funds to this contract
-        require(IERC20(polyToken).transferFrom(_holder, address(this), _polyAmount), "Insufficient allowance");
+        require(polyToken.transferFrom(_holder, address(this), _polyAmount), "Insufficient allowance");
         uint256 cachedNoOfeventsEmitted = noOfeventsEmitted + 1; // Caching number of events in memory, saves 1 SLOAD
         noOfeventsEmitted = cachedNoOfeventsEmitted; // Increment the event counter in storage
         // The event does not need to contain both `polymeshBalance` and `_polyAmount` as one can be derived from other.

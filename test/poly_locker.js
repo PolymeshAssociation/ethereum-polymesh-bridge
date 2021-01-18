@@ -2,7 +2,6 @@ import { catchRevert } from "./helpers/exceptions";
 
 const PolyLocker = artifacts.require("PolyLocker");
 const PolyToken = artifacts.require("PolyTokenFaucet");
-const MockPolyLocker = artifacts.require("MockPolyLocker");
 
 const Web3 = require("web3");
 

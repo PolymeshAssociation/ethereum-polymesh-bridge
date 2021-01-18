@@ -1,4 +1,6 @@
-pragma solidity 0.5.8;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.7.6;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -20,7 +22,7 @@ contract PolyTokenFaucet {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    constructor() public {
+    constructor() {
         decimals = 18;
         totalSupply_ = 1000000 * uint256(10) ** decimals;
         balances[msg.sender] = totalSupply_;
@@ -72,7 +74,7 @@ contract PolyTokenFaucet {
     /**
      * @notice Returns the balance of a token holder
      * @param _owner The address from which the balance will be retrieved
-     * @return The balance
+     * @return balance The balance
      */
     function balanceOf(address _owner) public view returns(uint256 balance) {
         return balances[_owner];
@@ -93,7 +95,7 @@ contract PolyTokenFaucet {
     /**
      * @param _owner The address of the account owning tokens
      * @param _spender The address of the account able to transfer the tokens
-     * @return Amount of remaining tokens allowed to be spent
+     * @return remaining Amount of remaining tokens allowed to be spent
      */
     function allowance(address _owner, address _spender) public view returns(uint256 remaining) {
         return allowed[_owner][_spender];
