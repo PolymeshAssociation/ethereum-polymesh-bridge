@@ -33,7 +33,7 @@
     "test": "scripts/test.sh 2> /dev/null",
     "version": "truffle version",
     "compile": "truffle compile --optimize-runs 200",
-    "coverage": "truffle run coverage",
+    "coverage": "POLYMATH_NATIVE_SOLC=true truffle run coverage",
     "ganache-cli": "node_modules/.bin/ganache-cli --hardfork istanbul -i 15 -p 9000 --gasLimit 9000000",
     "migrate:local": "truffle migrate --network=development",
     "migrate:goerli": "truffle migrate --network=goerli",
