@@ -37,7 +37,7 @@ jobs:
           path: ./test-results/mocha/results.xml
   coverage:
     docker:
-      - image: bakii0499/solidity:latest
+      - image: bakii0499/solidity:0.7.6
     steps:
       - checkout
       - restore_cache:
