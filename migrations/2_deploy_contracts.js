@@ -5,7 +5,7 @@ module.exports = async function(deployer, network, accounts) {
 
     let owner;
     let polyTokenAddress;
-    if (network === "development" || network === "coverage" || network === "develop" || network === "test") {
+    if (network === "development" || network === "coverage" || network === "develop" || network === "test" || network === "soliditycoverage") {
       owner = accounts[0];
       await deployer.deploy(PolyToken, {from: owner});
       polyTokenAddress = (await PolyToken.deployed()).address;

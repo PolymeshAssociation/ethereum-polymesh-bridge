@@ -50,7 +50,7 @@ contract PolyLocker is Ownable {
     event Unfrozen();
 
 
-    constructor(address _polyToken) {
+    constructor(address _polyToken) public {
         require(_polyToken != address(0), "Invalid address");
         polyToken = IERC20(_polyToken);
     }

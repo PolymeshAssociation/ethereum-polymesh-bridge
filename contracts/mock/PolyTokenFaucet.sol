@@ -22,7 +22,7 @@ contract PolyTokenFaucet {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    constructor() {
+    constructor() public {
         decimals = 18;
         totalSupply_ = 1000000 * uint256(10) ** decimals;
         balances[msg.sender] = totalSupply_;
