@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: bakii0499/solidity:latest
+      - image: bakii0499/solidity:0.7.6
     steps:
       - checkout
       - restore_cache:
@@ -17,7 +17,7 @@ jobs:
             - node_modules
   test:
     docker:
-      - image: bakii0499/solidity:latest
+      - image: bakii0499/solidity:0.7.6
     parallelism: 2
     steps:
       - checkout
