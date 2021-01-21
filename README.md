@@ -42,6 +42,11 @@ npm run test
 
 ## Kovan (Ethereum) <-> Alcyone (Polymesh testnet)
 
+### 2.4.0
+| Contracts | Address |
+|------------|--------|
+|PolyLocker | [0xa9cc9b84b8c3bd4af61443a9c3d6f02b90f1a9d0](https://kovan.etherscan.io/address/0xa9cc9b84b8c3bd4af61443a9c3d6f02b90f1a9d0#code)|
+
 ### 2.0.0
 | Contracts | Address |
 |------------|--------|
@@ -66,6 +71,7 @@ upgraded PolyLocker (Logic address) - [0xa11ded28bfa305e7c877d0310df436e1f841ef7
 |PolyToken: | [0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792](https://kovan.etherscan.io/address/0xB347b9f5B56b431B2CF4e1d90a5995f7519ca792) |
 
 upgraded PolyLocker (Logic address) - [0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e](https://kovan.etherscan.io/address/0xbdbbd3f124d4051df31b7f98e981d358a3bc4f5e)
+
 
 ## Kovan (Ethereum) <-> Aldebaran (Polymesh testnet)
 

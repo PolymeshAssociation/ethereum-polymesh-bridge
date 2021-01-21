@@ -2,4 +2,4 @@
 
 rm -rf flat
 
-COVERAGE=true POLYMATH_NATIVE_SOLC=true scripts/test.sh
+NODE_OPTIONS="--max-old-space-size=8192" POLYMATH_NATIVE_SOLC=true truffle run coverage
