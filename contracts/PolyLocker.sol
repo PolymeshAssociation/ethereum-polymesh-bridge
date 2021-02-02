@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.6;
+pragma solidity 0.7.6;
 
 // Requirements
 
@@ -104,19 +104,20 @@ contract PolyLocker is Ownable {
         // Validate the MESH address
         require(bytes(_meshAddress).length == VALID_ADDRESS_LENGTH, "Invalid length of mesh address");
 
-        // Make sure balance is divisible by 10e18
+        // Make sure the minimum `_polyAmount` is 1.
         require(_polyAmount >= E18, "Insufficient amount");
 
         // Polymesh balances have 6 decimal places.
         // 1 POLY on Ethereum has 18 decimal places. 1 POLYX on Polymesh has 6 decimal places.
-        // i.e. 1^18 POLY = 1^6 POLYX.
+        // i.e. 10^18 POLY = 10^6 POLYX.
         uint256 polymeshBalance = _polyAmount / TRUNCATE_SCALE;
         _polyAmount = polymeshBalance * TRUNCATE_SCALE;
 
-        // Transfer funds to this contract
+        // Transfer funds to this contract.
         require(polyToken.transferFrom(_holder, address(this), _polyAmount), "Insufficient allowance");
-        uint256 cachedNoOfeventsEmitted = noOfeventsEmitted + 1; // Caching number of events in memory, saves 1 SLOAD
-        noOfeventsEmitted = cachedNoOfeventsEmitted; // Increment the event counter in storage
+        uint256 cachedNoOfeventsEmitted = noOfeventsEmitted + 1;  // Caching number of events in memory, saves 1 SLOAD.
+        noOfeventsEmitted = cachedNoOfeventsEmitted;              // Increment the event counter in storage.
+
         // The event does not need to contain both `polymeshBalance` and `_polyAmount` as one can be derived from other.
         // However, we are still keeping them for easier integrations.
         emit PolyLocked(cachedNoOfeventsEmitted, _holder, _meshAddress, polymeshBalance, _polyAmount);
